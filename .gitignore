@@ -1,6 +1,6 @@
-# # C++ Build Files
-# /build/
-# *.exe
+# C++ Build Files
+/build/
+*.exe
 
-# # IDEs
-# .vscode/
+# IDEs
+.vscode/
