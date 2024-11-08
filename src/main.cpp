@@ -13,14 +13,13 @@ VOID OnPaint(HDC hdc)
 {
    // Ref: https://docs.microsoft.com/en-us/windows/desktop/gdiplus/-gdiplus-getting-started-use
    Graphics graphics(hdc);
-   
+
    AllocConsole();
    freopen("CONOUT$", "w", stdout);
 
    std::vector<RawElement*> vec;
    parseSVGFile(vec, "../assets/sample.svg");
    int n = vec.size();
-   cout << n << endl;
 
    for (int i = 0; i < n; i++){
       Renderer* render = RendererFactory::createRenderer(vec[i]);
