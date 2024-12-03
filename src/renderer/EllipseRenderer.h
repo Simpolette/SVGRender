@@ -12,7 +12,7 @@ private:
     int height;
 
 public:
-    EllipseRenderer(const Fill& fill, const Stroke& stroke, const Ellip& ellipse);
+    EllipseRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Ellip& ellipse);
     void render(Gdiplus::Graphics& graphics) const override;
 };
 

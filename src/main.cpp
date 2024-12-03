@@ -37,16 +37,16 @@ VOID OnPaint(HDC hdc)
 
    std::vector<RawElement*> vec;
    GetSVG getSVG;
-   getSVG.parseSVGFile(vec, "../assets/sample3.svg");
+   getSVG.parseSVGFile(vec, "../assets/sample2.svg");
    int n = vec.size();
 
    for (int i = 0; i < n; i++){
       vec[i]->print();
-      // Renderer* render = RendererFactory::createRenderer(vec[i]);
-      // render->render(graphics);
+      Renderer* render = RendererFactory::createRenderer(vec[i]);
+      render->render(graphics);
       
       delete vec[i];
-      // delete render; 
+      delete render; 
    }
 
    FreeConsole();

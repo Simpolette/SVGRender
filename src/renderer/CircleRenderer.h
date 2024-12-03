@@ -12,7 +12,7 @@ private:
     int height;
 
 public:
-    CircleRenderer(const Fill& fill, const Stroke& stroke, const Circle& circle);
+    CircleRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Circle& circle);
     void render(Gdiplus::Graphics& graphics) const override;
 
 };

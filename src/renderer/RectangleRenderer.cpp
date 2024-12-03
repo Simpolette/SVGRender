@@ -1,7 +1,7 @@
 #include "RectangleRenderer.h"
 
-RectangleRenderer::RectangleRenderer(const Fill& fill, const Stroke& stroke, const Rectan& rect)
-: Renderer(fill, stroke) {
+RectangleRenderer::RectangleRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Rectan& rect)
+: Renderer(fill, stroke, transform) {
     Gdiplus::Point coord = rect.getPoint();
     x = coord.X;
     y = coord.Y;

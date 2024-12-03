@@ -1,7 +1,7 @@
 #include "CircleRenderer.h"
 
-CircleRenderer::CircleRenderer(const Fill& fill, const Stroke& stroke, const Circle& circle)
-: Renderer(fill, stroke) {
+CircleRenderer::CircleRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Circle& circle)
+: Renderer(fill, stroke, transform) {
     Gdiplus::Point coord = circle.getPoint();
     int r = circle.getRadius();
 

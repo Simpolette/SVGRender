@@ -1,6 +1,7 @@
 #include "TextRenderer.h"
 
-TextRenderer::TextRenderer(const Fill& fill, const Stroke& stroke, const Text& text) : Renderer(fill, stroke) {
+TextRenderer::TextRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Text& text) 
+: Renderer(fill, stroke, transform) {
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
     Gdiplus::FontFamily family(L"Arial");
     int ascent = family.GetCellAscent(0);

@@ -1,7 +1,7 @@
 #include "LineRenderer.h"
 
-LineRenderer::LineRenderer(const Fill& fill, const Stroke& stroke, const Line& line)
-: Renderer(fill, stroke) {
+LineRenderer::LineRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Line& line)
+: Renderer(fill, stroke, transform) {
     startPoint = line.getPointStart();
     endPoint = line.getPointEnd();
 }

@@ -17,7 +17,7 @@ private:
     Gdiplus::StringFormat format;
 
 public:
-    TextRenderer(const Fill& fill, const Stroke& stroke, const Text& text);
+    TextRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Text& text);
     void render(Gdiplus::Graphics& graphics) const override;
 
 };

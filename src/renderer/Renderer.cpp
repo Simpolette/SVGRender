@@ -1,13 +1,13 @@
 #include "Renderer.h"
 using namespace std;
-Renderer::Renderer(const Fill& fill, const Stroke& stroke){
+Renderer::Renderer(const Fill& fill, const Stroke& stroke, const Transform& transform){
     pen = getPen(stroke);
     brush = getBrush(fill);
+    matrix = getMatrix(transform);
 }
 
 Gdiplus::Pen* Renderer::getPen(const Stroke& stroke) {
     Gdiplus::Color color = stroke.getColorA();
-    // cout << stroke.getOpacity() * 255 << " " << (int)color.GetR() << " " << (int)color.GetG() << " " << (int)color.GetB() << endl;
     Gdiplus::Color penColor(
         static_cast<BYTE>(stroke.getOpacity() * 255), // Độ trong suốt (alpha)
         color.GetRed(),
@@ -22,7 +22,6 @@ Gdiplus::Pen* Renderer::getPen(const Stroke& stroke) {
 
 Gdiplus::Brush* Renderer::getBrush(const Fill& fill) {
     Gdiplus::Color color = fill.getColorA();
-    // cout << fill.getOpacity() * 255 << " " << (int)color.GetR() << " " << (int)color.GetG() << " " << (int)color.GetB() << endl;
     Gdiplus::Color brushColor(
         static_cast<BYTE>(fill.getOpacity() * 255), 
         color.GetRed(),
@@ -33,4 +32,19 @@ Gdiplus::Brush* Renderer::getBrush(const Fill& fill) {
     Gdiplus::Brush* brush = new Gdiplus::SolidBrush(brushColor);    
 
     return brush;
+}
+
+Gdiplus::Matrix* Renderer::getMatrix(const Transform& transform){
+    Gdiplus::Matrix* matrix = new Gdiplus::Matrix;
+    matrix->Translate(transform.getTranslate().X, transform.getTranslate().Y);
+    matrix->Rotate(transform.getRotate());
+    matrix->Scale(transform.getScale().X, transform.getScale().Y);
+
+    return matrix;
+}
+
+Renderer::~Renderer(){
+    delete pen;
+    delete brush;
+    delete matrix;
 }

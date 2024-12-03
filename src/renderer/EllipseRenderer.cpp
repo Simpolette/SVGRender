@@ -1,7 +1,7 @@
 #include "EllipseRenderer.h"
 
-EllipseRenderer::EllipseRenderer(const Fill& fill, const Stroke& stroke, const Ellip& ellipse)
-: Renderer(fill, stroke) {
+EllipseRenderer::EllipseRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Ellip& ellipse)
+: Renderer(fill, stroke, transform) {
     Gdiplus::Point coord = ellipse.getPoint();
     int rx = ellipse.getRX();
     int ry = ellipse.getRY();

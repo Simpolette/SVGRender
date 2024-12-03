@@ -9,7 +9,8 @@
 #include "CircleRenderer.h"
 #include "EllipseRenderer.h"
 #include "TextRenderer.h"
-
+#include "GroupRenderer.h"
+#include "PathRenderer.h"
 
 class RendererFactory{
 
