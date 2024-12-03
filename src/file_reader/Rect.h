@@ -12,7 +12,8 @@ public:
     int getWidth() const;
     int getHeight() const;
     ElementType getType() const;
-    Rectan(Gdiplus::Point coord, int width, int height, const Stroke& stroke, const Fill& fill);
+    void print() const override;
+    Rectan(Gdiplus::Point coord, int width, int height, const Stroke& stroke, const Fill& fill, const Transform& transform);
 };
 
 #endif

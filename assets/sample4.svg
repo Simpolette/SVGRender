@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400">
+  <!-- Bầu trời -->
+  <path d="M0,0H800V400H0Z" fill="rgb(135,206,235)"/>
+  
+  <!-- Mặt trời -->
+  <g transform="translate(50,50)">
+    <circle cx="50" cy="50" r="30" fill="rgb(255,222,33)"/>
+  </g>
+  <!-- Mặt đất -->
+  <rect x="0" y="300" width="800" height="100" fill="rgb(0,128,0)" transform="translate(0,10)"/>
+
+  <!-- Ngôi nhà -->
+  <g transform="translate(-50,0)scale(1,1)">
+    <!-- Thân nhà -->
+    <rect x="200" y="200" width="150" height="150" fill="rgb(160,82,45)" stroke="rgb(0,0,0)"/>
+    <!-- Mái nhà -->
+    <polygon points="200,200,275,150,350,200" fill="rgb(165,42,42)" stroke="rgb(0,0,0)"/>
+    <!-- Cửa sổ bên trái -->
+    <rect x="215" y="220" width="40" height="40" fill="rgb(255,255,255)" stroke="rgb(0,0,0)"/>
+    <line x1="215" y1="240" x2="255" y2="240" stroke="rgb(0,0,0)"/>
+    <line x1="235" y1="220" x2="235" y2="260" stroke="rgb(0,0,0)"/>
+    <!-- Cửa sổ bên phải -->
+    <rect x="295" y="220" width="40" height="40" fill="rgb(255,255,255)" stroke="rgb(0,0,0)"/>
+    <line x1="295" y1="240" x2="335" y2="240" stroke="rgb(0,0,0)"/>
+    <line x1="315" y1="220" x2="315" y2="260" stroke="rgb(0,0,0)"/>
+    <!-- Cửa chính -->
+    <rect x="260" y="280" width="40" height="70" fill="rgb(139,69,19)" stroke="rgb(0,0,0)"/>
+  </g>
+
+  <!-- Cây -->
+  <g transform="translate(50,-30)scale(1,1)">
+    <!-- Thân cây -->
+    <rect x="500" y="250" width="30" height="100" fill="rgb(139,69,19)"/>
+    <!-- Tán cây -->
+    <circle cx="515" cy="230" r="50" fill="rgb(0,128,0)"/>
+    <circle cx="480" cy="200" r="40" fill="rgb(0,128,0)"/>
+    <circle cx="550" cy="200" r="40" fill="rgb(0,128,0)"/>
+  </g>
+</svg>

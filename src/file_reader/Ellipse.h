@@ -12,7 +12,8 @@ public:
     int getRX() const;
     int getRY() const;
     ElementType getType() const;
-    Ellip(Gdiplus::Point coord, int rx, int ry, const Stroke& stroke, const Fill& fill); 
+    void print() const override;
+    Ellip(Gdiplus::Point coord, int rx, int ry, const Stroke& stroke, const Fill& fill, const Transform& transform); 
 };
 
 

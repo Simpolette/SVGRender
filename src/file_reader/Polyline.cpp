@@ -1,7 +1,7 @@
 #include "Polyline.h"
 
-PolyLine::PolyLine(std::string points, const Stroke& stroke, const Fill& fill)
-: RawElement(stroke, fill) {
+PolyLine::PolyLine(std::string points, const Stroke& stroke, const Fill& fill, const Transform& transform)
+: RawElement(stroke, fill, transform) {
     if (points != ""){
         std::istringstream iss(points);
         std::string temp;
@@ -23,3 +23,10 @@ ElementType PolyLine::getType() const {
     return ElementType::POLYLINE;
 }
 
+void PolyLine::print() const{
+    std::cout << "Type: Polyline\n";
+    RawElement::print();
+    for (int i = 0; i < points.size(); i++){
+        std::cout << "Point" << i + 1 << ": (" << points[i].X << ", " << points[i].Y << ")\n";
+    }
+}

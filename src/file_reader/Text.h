@@ -13,7 +13,8 @@ public:
     Gdiplus::Point getPoint() const;
     int getFontSize() const;
     ElementType getType() const;
-    Text(std::string content, Gdiplus::Point coord, int font_size, const Stroke& stroke, const Fill& fill);
+    void print() const override;
+    Text(std::string content, Gdiplus::Point coord, int font_size, const Stroke& stroke, const Fill& fill, const Transform& transform);
 };
 
 #endif

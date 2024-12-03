@@ -9,24 +9,44 @@ using namespace std;
 using namespace Gdiplus;
 #pragma comment (lib,"Gdiplus.lib")
 
+float scale = 1.0f;
+float rotationAngle = 0.0f;
+
 VOID OnPaint(HDC hdc)
 {
    // Ref: https://docs.microsoft.com/en-us/windows/desktop/gdiplus/-gdiplus-getting-started-use
    Graphics graphics(hdc);
+   Gdiplus::Matrix matrix;
+   matrix.Scale(scale, scale); 
+
+   RECT clientRect;
+   GetClientRect(WindowFromDC(hdc), &clientRect);
+   float centerX = (clientRect.right - clientRect.left) / 2.0f;
+   float centerY = (clientRect.bottom - clientRect.top) / 2.0f;
+
+   // Áp dụng các phép biến đổi
+   matrix.Translate(-centerX, -centerY);  // Dịch về gốc tọa độ
+   matrix.Rotate(rotationAngle);         // Xoay quanh gốc
+   matrix.Translate(centerX, centerY);   // Dịch về vị trí ban đầu
+   matrix.Scale(scale, scale);           // Áp dụng zoom
+
+   graphics.SetTransform(&matrix);
 
    AllocConsole();
    freopen("CONOUT$", "w", stdout);
 
    std::vector<RawElement*> vec;
-   parseSVGFile(vec, "../assets/sample.svg");
+   GetSVG getSVG;
+   getSVG.parseSVGFile(vec, "../assets/sample3.svg");
    int n = vec.size();
 
    for (int i = 0; i < n; i++){
-      Renderer* render = RendererFactory::createRenderer(vec[i]);
-      render->render(graphics);
+      vec[i]->print();
+      // Renderer* render = RendererFactory::createRenderer(vec[i]);
+      // render->render(graphics);
       
       delete vec[i];
-      delete render; 
+      // delete render; 
    }
 
    FreeConsole();
@@ -98,6 +118,40 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
       OnPaint(hdc);
       EndPaint(hWnd, &ps);
       return 0;
+   case WM_MOUSEWHEEL: {
+       int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+       if (zDelta > 0) {
+           scale *= 1.1f; // Zoom in
+       }
+       else {
+           scale /= 1.1f; // Zoom out
+       }
+       InvalidateRect(hWnd, NULL, TRUE);
+       return 0;
+   }
+   case WM_KEYDOWN:
+       switch (wParam) {
+       case VK_LEFT: // Xoay ngược chiều kim đồng hồ
+           rotationAngle -= 90.0f;
+           if (rotationAngle < 0) rotationAngle += 360;
+           InvalidateRect(hWnd, NULL, TRUE);
+           break;
+       case VK_RIGHT: // Xoay thuận chiều kim đồng hồ
+           rotationAngle += 90.0f;
+           if (rotationAngle >= 360) rotationAngle -= 360;
+           InvalidateRect(hWnd, NULL, TRUE);
+           break;
+       case VK_UP: // Zoom in
+           scale += 0.1f;
+           InvalidateRect(hWnd, NULL, TRUE);
+           break;
+       case VK_DOWN: // Zoom out
+           scale -= 0.1f;
+           if (scale < 0.1f) scale = 0.1f; // Đặt ngưỡng zoom nhỏ nhất
+           InvalidateRect(hWnd, NULL, TRUE);
+           break;
+       }
+       return 0;
    case WM_DESTROY:
       PostQuitMessage(0);
       return 0;

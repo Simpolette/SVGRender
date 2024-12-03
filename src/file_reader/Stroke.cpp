@@ -32,3 +32,12 @@ double Stroke::getOpacity() const {
 int Stroke::getWidth() const{
     return stroke_width;
 }
+
+void Stroke::print() const{
+    std::cout << "Stroke:\n"; 
+    std::cout << "Color: (" << (int)stroke.GetR() << ", " 
+                            << (int)stroke.GetG() << ", " 
+                            << (int)stroke.GetB() << ")\n";
+    std::cout << "Opacity: " << stroke_opacity << "\n";
+    std::cout << "Width: " << stroke_width << "\n";
+}

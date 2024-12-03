@@ -7,7 +7,7 @@ Renderer::Renderer(const Fill& fill, const Stroke& stroke){
 
 Gdiplus::Pen* Renderer::getPen(const Stroke& stroke) {
     Gdiplus::Color color = stroke.getColorA();
-    cout << stroke.getOpacity() * 255 << " " << (int)color.GetR() << " " << (int)color.GetG() << " " << (int)color.GetB() << endl;
+    // cout << stroke.getOpacity() * 255 << " " << (int)color.GetR() << " " << (int)color.GetG() << " " << (int)color.GetB() << endl;
     Gdiplus::Color penColor(
         static_cast<BYTE>(stroke.getOpacity() * 255), // Độ trong suốt (alpha)
         color.GetRed(),
@@ -22,7 +22,7 @@ Gdiplus::Pen* Renderer::getPen(const Stroke& stroke) {
 
 Gdiplus::Brush* Renderer::getBrush(const Fill& fill) {
     Gdiplus::Color color = fill.getColorA();
-    cout << fill.getOpacity() * 255 << " " << (int)color.GetR() << " " << (int)color.GetG() << " " << (int)color.GetB() << endl;
+    // cout << fill.getOpacity() * 255 << " " << (int)color.GetR() << " " << (int)color.GetG() << " " << (int)color.GetB() << endl;
     Gdiplus::Color brushColor(
         static_cast<BYTE>(fill.getOpacity() * 255), 
         color.GetRed(),

@@ -9,7 +9,8 @@ private:
 public:
     std::vector<Gdiplus::Point> getPoints() const;
     ElementType getType() const;
-    PolyGon(std::string points, const Stroke& stroke, const Fill& fill);
+    void print() const override;
+    PolyGon(std::string points, const Stroke& stroke, const Fill& fill, const Transform& transform);
 };
 
 #endif

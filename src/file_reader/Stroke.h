@@ -22,6 +22,7 @@ public:
     Gdiplus::Color getColorA() const;
     double getOpacity() const;
     int getWidth() const;
+    void print() const;
 };
 
 #endif

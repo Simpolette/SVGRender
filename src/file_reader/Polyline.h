@@ -9,7 +9,8 @@ private:
 public:
     std::vector<Gdiplus::Point> getPoints() const;
     ElementType getType() const;
-    PolyLine(std::string points, const Stroke& stroke, const Fill& fill);
+    void print() const override;
+    PolyLine(std::string points, const Stroke& stroke, const Fill& fill, const Transform& transform);
 };
 
 #endif

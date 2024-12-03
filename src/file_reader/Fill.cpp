@@ -22,3 +22,11 @@ Gdiplus::Color Fill::getColorA() const {
 double Fill::getOpacity() const {
     return opacity;
 }
+
+void Fill::print() const{
+    std::cout << "Fill:\n"; 
+    std::cout << "Color: (" << (int)color.GetR() << ", " 
+                            << (int)color.GetG() << ", " 
+                            << (int)color.GetB() << ")\n";
+    std::cout << "Opacity: " << opacity << "\n";
+}

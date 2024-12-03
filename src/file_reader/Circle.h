@@ -11,7 +11,8 @@ public:
     Gdiplus::Point getPoint() const;
     int getRadius() const;
     ElementType getType() const;
-    Circle(Gdiplus::Point coord, int radius, const Stroke& stroke, const Fill& fill);
+    void print() const override;
+    Circle(Gdiplus::Point coord, int radius, const Stroke& stroke, const Fill& fill, const Transform& transform);
 };
 
 #endif

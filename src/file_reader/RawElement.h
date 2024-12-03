@@ -10,6 +10,7 @@
 
 #include "Stroke.h"
 #include "Fill.h"
+#include "Transform.h"
 
 enum class ElementType{
     LINE,
@@ -19,6 +20,8 @@ enum class ElementType{
     ELLIPSE,
     TEXT,
     RECTANGLE,
+    GROUP,
+    PATH,
 };
 
 class RawElement{
@@ -26,13 +29,15 @@ class RawElement{
 protected:
     Stroke stroke;
     Fill fill;
-    
+    Transform transform;
 public:
     virtual ElementType getType() const = 0;
     Fill getFill() const;
     Stroke getStroke() const;
+    Transform getTransform() const;
+    virtual void print() const;
     RawElement();
-    RawElement(const Stroke& stroke, const Fill& fill);
+    RawElement(const Stroke& stroke, const Fill& fill, const Transform& transform);
 };
 
 #endif
