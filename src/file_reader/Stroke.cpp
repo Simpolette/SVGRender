@@ -1,43 +1,43 @@
 #include "Stroke.h"
 
 Stroke::Stroke(){
-    this->stroke = Gdiplus::Color(0, 0, 0);
-    this->stroke_width = 1;
-    this->stroke_opacity = 1;
-    this->stroke_linecap = "butt";
-    this->stroke_dasharray.clear();
-    this->stroke_linejoin = "miter";
+    this->color = Gdiplus::Color(0, 0, 0);
+    this->width = 1;
+    this->opacity = 1;
+    this->linecap = "butt";
+    this->dasharray.clear();
+    this->linejoin = "miter";
 }
 
-Stroke::Stroke(std::string color, int stroke_width, double stroke_opacity, std::string stroke_linecap, std::vector<double> stroke_dasharray, std::string stroke_linejoin){
+Stroke::Stroke(std::string color, int width, double opacity, std::string linecap, std::vector<double> dasharray, std::string linejoin){
     int red, green, blue;
 
     getColor(color, red, green, blue);
-    this->stroke = Gdiplus::Color(red, green, blue);
-    this->stroke_width = stroke_width;
-    this->stroke_opacity = stroke_opacity;
-    this->stroke_linecap = stroke_linecap;
-    this->stroke_dasharray.clear();
-    this->stroke_linejoin = stroke_linejoin;
+    this->color = Gdiplus::Color(red, green, blue);
+    this->width = width;
+    this->opacity = opacity;
+    this->linecap = linecap;
+    this->dasharray.clear();
+    this->linejoin = linejoin;
 }
 
 Gdiplus::Color Stroke::getColorA() const {
-    return stroke;
+    return color;
 }
 
 double Stroke::getOpacity() const {
-    return stroke_opacity;
+    return opacity;
 }
 
 int Stroke::getWidth() const{
-    return stroke_width;
+    return width;
 }
 
 void Stroke::print() const{
     std::cout << "Stroke:\n"; 
-    std::cout << "Color: (" << (int)stroke.GetR() << ", " 
-                            << (int)stroke.GetG() << ", " 
-                            << (int)stroke.GetB() << ")\n";
-    std::cout << "Opacity: " << stroke_opacity << "\n";
-    std::cout << "Width: " << stroke_width << "\n";
+    std::cout << "Color: (" << (int)color.GetR() << ", " 
+                            << (int)color.GetG() << ", " 
+                            << (int)color.GetB() << ")\n";
+    std::cout << "Opacity: " << opacity << "\n";
+    std::cout << "Width: " << width << "\n";
 }
