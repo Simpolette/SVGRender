@@ -462,6 +462,9 @@ std::vector<std::pair<char, Gdiplus::Point>> GetSVG::parsePathData(rapidxml::xml
         }
         else{
             if (curCommand == 'M' || curCommand == 'm' || curCommand == 'L' || curCommand == 'l'){
+                if (curCommand == 'M' || curCommand == 'm'){
+                    curCommand--;
+                }
                 double x, y;
                 x = stod(val);
                 ss >> y;
