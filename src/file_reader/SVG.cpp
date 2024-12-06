@@ -330,12 +330,13 @@ RawElement* GetSVG::parseText(rapidxml::xml_node<> *node){
     return new Text(content, Gdiplus::Point(x, y), font_size, stroke, fill, transform);
 }
 
-RawElement* GetSVG::parseGroup(rapidxml::xml_node<> *node) {
+RawElement* GetSVG::parseGroup(rapidxml::xml_node<> *node, rapidxml::xml_document<>& doc) {
     Stroke stroke = parseStroke(node->first_attribute());
     Fill fill = parseFill(node->first_attribute());
     Transform transform;
 
     std::vector<RawElement*> vec;
+    std::vector<std::pair<std::string, std::string>> inheritAttr;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
         std::string attrName = attr->name();
@@ -344,39 +345,59 @@ RawElement* GetSVG::parseGroup(rapidxml::xml_node<> *node) {
         if (attrName == "transform") {
             transform = parseTransform(attrValue);
         }
+        else{
+            inheritAttr.push_back(std::make_pair(attrName, attrValue));
+        }
     }
 
     for (rapidxml::xml_node<>* child = node->first_node(); child; child = child->next_sibling()) {
-        std::string ShapeName = child->name();
-        if (ShapeName == "rect"){
+        std::string shapeName = child->name();
+        
+        for (int i = 0; i < inheritAttr.size(); i++){
+            bool isExisted = false;
+            for (rapidxml::xml_attribute<>* attr = child->first_attribute(); attr; attr = attr->next_attribute()){
+                if (inheritAttr[i].first == attr->value()){
+                    isExisted = true;
+                    break;
+                }
+            }
+            if (!isExisted){
+                char* attrName = doc.allocate_string(inheritAttr[i].first.c_str());
+                char* attrValue = doc.allocate_string(inheritAttr[i].second.c_str());
+                rapidxml::xml_attribute<>* attr = doc.allocate_attribute(attrName, attrValue);
+                child->append_attribute(attr);
+            }
+        }
+
+        if (shapeName == "rect"){
             RawElement* rect = this->parseRect(child);
             vec.push_back(rect);
         }
-        else if (ShapeName == "circle"){
+        else if (shapeName == "circle"){
             RawElement* circle = this->parseCircle(child);
             vec.push_back(circle);
         }
-        else if (ShapeName == "ellipse"){
+        else if (shapeName == "ellipse"){
             RawElement* ellip = this->parseEllipse(child);
             vec.push_back(ellip);
         }
-        else if (ShapeName == "polygon"){
+        else if (shapeName == "polygon"){
             RawElement* polygon = this->parsePolygon(child);
             vec.push_back(polygon);
         }
-        else if (ShapeName == "polyline"){
+        else if (shapeName == "polyline"){
             RawElement* polyline = this->parsePolyline(child);
             vec.push_back(polyline);
         }
-        else if (ShapeName == "line"){
+        else if (shapeName == "line"){
             RawElement* line = this->parseLine(child);
             vec.push_back(line);
         }
-        else if (ShapeName == "g") {
-            RawElement* group = this->parseGroup(child);
+        else if (shapeName == "g") {
+            RawElement* group = this->parseGroup(child, doc);
             vec.push_back(group);
         }
-        else if (ShapeName == "path") {
+        else if (shapeName == "path") {
             RawElement* path = this->parsePath(child);
             vec.push_back(path);
         }
@@ -542,36 +563,36 @@ std::vector<RawElement*> GetSVG::parseSVGFile(const std::string& filePath){
     rapidxml::xml_node<> *root = doc.first_node("svg");
     if (root){
         for (rapidxml::xml_node<> *child = root->first_node(); child; child = child->next_sibling()) {
-            std::string ShapeName = child->name();
-            if (ShapeName == "rect"){
+            std::string shapeName = child->name();
+            if (shapeName == "rect"){
                 RawElement* rect = this->parseRect(child);
                 vec.push_back(rect);
             }
-            else if (ShapeName == "circle"){
+            else if (shapeName == "circle"){
                 RawElement* circle = this->parseCircle(child);
                 vec.push_back(circle);
             }
-            else if (ShapeName == "ellipse"){
+            else if (shapeName == "ellipse"){
                 RawElement* ellip = this->parseEllipse(child);
                 vec.push_back(ellip);
             }
-            else if (ShapeName == "polygon"){
+            else if (shapeName == "polygon"){
                 RawElement* polygon = this->parsePolygon(child);
                 vec.push_back(polygon);
             }
-            else if (ShapeName == "polyline"){
+            else if (shapeName == "polyline"){
                 RawElement* polyline = this->parsePolyline(child);
                 vec.push_back(polyline);
             }
-            else if (ShapeName == "line"){
+            else if (shapeName == "line"){
                 RawElement* line = this->parseLine(child);
                 vec.push_back(line);
             }
-            else if (ShapeName == "g") {
-                RawElement* group = this->parseGroup(child);
+            else if (shapeName == "g") {
+                RawElement* group = this->parseGroup(child, doc);
                 vec.push_back(group);
             }
-            else if (ShapeName == "path") {
+            else if (shapeName == "path") {
                 RawElement* path = this->parsePath(child);
                 vec.push_back(path);
             }

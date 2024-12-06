@@ -38,7 +38,7 @@ private:
     RawElement* parsePolyline(rapidxml::xml_node<> *node);
     RawElement* parseLine(rapidxml::xml_node<> *node);
     RawElement* parseText(rapidxml::xml_node<> *node);
-    RawElement* parseGroup(rapidxml::xml_node<> * node);
+    RawElement* parseGroup(rapidxml::xml_node<> * node, rapidxml::xml_document<>& doc);
     RawElement* parsePath(rapidxml::xml_node<> *node);
     std::vector<std::pair<char, Gdiplus::Point>> parsePathData(rapidxml::xml_attribute<> *attr);
 
