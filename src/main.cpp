@@ -16,6 +16,8 @@ VOID OnPaint(HDC hdc)
 {
    // Ref: https://docs.microsoft.com/en-us/windows/desktop/gdiplus/-gdiplus-getting-started-use
    Graphics graphics(hdc);
+   graphics.SetSmoothingMode(SmoothingModeHighQuality);
+   
    Gdiplus::Matrix matrix;
    matrix.Scale(scale, scale); 
 
@@ -32,12 +34,10 @@ VOID OnPaint(HDC hdc)
 
    graphics.SetTransform(&matrix);
 
-   AllocConsole();
-   freopen("CONOUT$", "w", stdout);
 
-   std::vector<RawElement*> vec;
+
    GetSVG getSVG;
-   getSVG.parseSVGFile(vec, "../assets/sample2.svg");
+   std::vector<RawElement*> vec = getSVG.parseSVGFile("../assets/sample2.svg");
    int n = vec.size();
 
    for (int i = 0; i < n; i++){
@@ -48,15 +48,14 @@ VOID OnPaint(HDC hdc)
       delete vec[i];
       delete render; 
    }
-
-   FreeConsole();
-
 }
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
 {
+   AllocConsole();
+   freopen("CONOUT$", "w", stdout);
    HWND                hWnd;
    MSG                 msg;
    WNDCLASS            wndClass;
@@ -102,6 +101,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
    }
    
    GdiplusShutdown(gdiplusToken);
+   FreeConsole();
    return msg.wParam;
 }  // WinMain
 

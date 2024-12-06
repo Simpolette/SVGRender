@@ -7,5 +7,11 @@ LineRenderer::LineRenderer(const Fill& fill, const Stroke& stroke, const Transfo
 }
 
 void LineRenderer::render(Gdiplus::Graphics& graphics) const {
+    Gdiplus::Matrix originalMatrix;
+    graphics.GetTransform(&originalMatrix);
+    graphics.MultiplyTransform(matrix);
+
     graphics.DrawLine(pen, startPoint, endPoint);
+
+    graphics.SetTransform(&originalMatrix);
 }

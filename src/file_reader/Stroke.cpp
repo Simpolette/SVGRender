@@ -10,15 +10,17 @@ Stroke::Stroke(){
 }
 
 Stroke::Stroke(std::string color, int width, double opacity, std::string linecap, std::vector<double> dasharray, std::string linejoin){
-    int red, green, blue;
-
-    getColor(color, red, green, blue);
-    this->color = Gdiplus::Color(red, green, blue);
+    SVGColor fillColor(color);
+    this->color = Gdiplus::Color(fillColor.getR(), fillColor.getG(), fillColor.getB());
     this->width = width;
     this->opacity = opacity;
     this->linecap = linecap;
     this->dasharray.clear();
     this->linejoin = linejoin;
+
+    if (color != ""){
+        this->opacity = 1;
+    }
 }
 
 Gdiplus::Color Stroke::getColorA() const {

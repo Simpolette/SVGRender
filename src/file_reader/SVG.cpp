@@ -1,100 +1,156 @@
 #include "SVG.h"
 
-void GetSVG::processTransform(const std::string& transformValue, Gdiplus::Point &translate, Gdiplus::Point &scale, double rotate) {
-    std::istringstream ss(transformValue);
-    std::string transform;
+Stroke GetSVG::parseStroke(rapidxml::xml_attribute<> *attr){
+    std::string color = "";
+    int width = 1;
+    double opacity = 0;
+    std::string linecap = "butt";
+    std::vector<double> dasharray;
+    std::string linejoin = "miter";
+    
+    for (;attr ;attr = attr->next_attribute()){
+        std::string attrName = attr->name();
+        std::string attrValue = attr->value();
 
-    while (getline(ss, transform, ')')) {
-        std::istringstream ss2(transform);
-        std::string temp;
-        getline(ss2, temp, '(');
-        if (temp == "translate") {
-            std::string tempValue;
-            int x = 0, y = 0;
-            getline(ss2, tempValue, ',');
-            x = stoi(tempValue);
-            getline(ss2, tempValue);
-            y = stoi(tempValue);
-
-            translate = Gdiplus::Point(x, y);
+        if (attrName == "stroke") {
+            color = attrValue;
+            if (color.find("none") != std::string::npos){
+                opacity = 0;
+                color = "";
+                break;
+            }
         }
-        else if (temp == "scale") {
-            std::string tempValue;
-            int x = 0, y = 0;
-            getline(ss2, tempValue, ',');
-            x = stoi(tempValue);
-            getline(ss2, tempValue);
-            y = stoi(tempValue);
-
-            scale = Gdiplus::Point(x, y);
+        else if (attrName == "stroke-width"){
+            width = stoi(attrValue);
         }
-        else if (temp == "rotate") {
-            std::string tempValue;
-            getline(ss2, tempValue);
-            rotate = stod(tempValue);
+        else if (attrName == "stroke-opacity"){
+            opacity = stod(attrValue);
+        }
+        else if (attrName == "stroke-linecap"){
+            linecap = attrValue;
+        }
+        else if (attrName == "stroke-dasharray"){
+            //Stroke_dasharray
+        }
+        else if (attrName == "stroke-linejoin"){
+            linejoin = attrValue;
         }
     }
+
+    return Stroke(color, width, opacity, linecap, dasharray, linejoin);
 }
 
-void GetSVG::setData(const std::string& attrName, const std::string& attrValue, std::string& stroke, int& stroke_width, double& stroke_opacity, std::string& stroke_linecap, std::vector<double>& stroke_dasharray, std::string& stroke_linejoin, std::string& fill, double& fill_opacity, std::string& fill_rule){
-    if (attrName == "stroke") {
-        stroke = attrValue;
+Fill GetSVG::parseFill(rapidxml::xml_attribute<> *attr){
+    std::string color = "";
+    double opacity = 1;
+    std::string rule = "nonezero";
+    
+    for (;attr ;attr = attr->next_attribute()){
+        std::string attrName = attr->name();
+        std::string attrValue = attr->value();
+
+        if (attrName == "fill"){
+            color = attrValue;
+            if (color.find("none") != std::string::npos){
+                opacity = 0;
+                color = "";
+                break;
+            }
+        }
+        else if (attrName == "fill-opacity"){
+            opacity = stod(attrValue);
+        }
+        else if (attrName == "fill-rule"){
+            rule = attrValue;
+        }
     }
-    else if (attrName == "stroke-width"){
-        stroke_width = stoi(attrValue);
+
+    return Fill(color, opacity, rule);
+}
+
+bool GetSVG::checkNumber(char ch){
+    return ch >= '0' && ch <= '9';
+}
+
+int GetSVG::countAttrVal(const std::string& attrValue){
+    int cnt = 0;
+    int n = attrValue.size();
+    if (n > 0 && attrValue[0] != ' '){
+        cnt = 1;
     }
-    else if (attrName == "stroke-opacity"){
-        stroke_opacity = stod(attrValue);
+    for (int i = 0; i < n - 1; i++){
+        if (attrValue[i] == ' ' && checkNumber(attrValue[i + 1])){
+            cnt++;
+        }
     }
-    else if (attrName == "stroke-linecap"){
-        stroke_linecap = attrValue;
+    return cnt;
+}
+
+Transform GetSVG::parseTransform(const std::string& transformVal){
+    Gdiplus::Point translate;
+    Gdiplus::Point scale(1, 1);
+    double rotate = 0;
+
+    std::istringstream ss(transformVal);
+    std::string transform;
+
+    while (getline(ss, transform, ')')){
+        std::istringstream ss2(transform);
+        std::string attrName;
+        std::string attrValue;
+        
+        getline(ss2, attrName, '(');
+        getline(ss2, attrValue, ')');
+        standardizeString(attrValue);
+        std::istringstream ss3(attrValue);
+        
+        int cnt = countAttrVal(attrValue);
+
+        if (attrName.find("translate") != std::string::npos){
+            double x, y;
+            ss3 >> x >> y;
+            translate = Gdiplus::Point(x, y);
+        }
+        else if (attrName.find("scale") != std::string::npos){
+            double x, y;
+            if (cnt >= 1){
+                ss3 >> x;
+                y = x;
+            }
+            if (cnt >= 2){
+                ss3 >> y;
+            }
+            scale = Gdiplus::Point(x, y);
+        }
+        else if (attrName.find("rotate") != std::string::npos){
+            double x, y;
+            if (cnt >= 1){
+                ss3 >> rotate;
+            }
+            if (cnt >= 3){
+                ss3 >> x >> y;
+            }
+        }
     }
-    else if (attrName == "stroke-dasharray"){
-        //Stroke_dasharray
-    }
-    else if (attrName == "stroke-linejoin"){
-        stroke_linejoin = attrValue;
-    }
-    else if (attrName == "fill"){
-        fill = attrValue;
-    }
-    else if (attrName == "fill-opacity"){
-        fill_opacity = stod(attrValue);
-    }
-    else if (attrName == "fill-rule"){
-        fill_rule = attrValue;
-    }
+
+    return Transform(translate, scale, rotate);
 }
 
 RawElement* GetSVG::parseRect(rapidxml::xml_node<> *node){
-    std::string stroke = "";
-    int stroke_width = 1;
-    double stroke_opacity = 1;
-    std::string stroke_linecap = "butt";
-    std::vector<double> stroke_dasharray;
-    std::string stroke_linejoin = "miter";
-
-    std::string fill = "";
-    double fill_opacity = 1;
-    std::string fill_rule = "nonezero";
-
     int x = 0, y = 0, width = 0, height = 0;
 
-    Gdiplus::Point translate;
-    Gdiplus::Point scale;
-    double rotate = 0;
+    Stroke stroke = parseStroke(node->first_attribute());
+    Fill fill = parseFill(node->first_attribute());
+    Transform transform;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
         std::string attrName = attr->name();
         std::string attrValue = attr->value();
 
-        if (attrName == "transform") {
-            this->processTransform(attrValue, translate, scale, rotate);
+        if (attrName == "transform"){
+            transform = parseTransform(attrValue);
         }
-
-        this->setData(attrName, attrValue, stroke, stroke_width, stroke_opacity, stroke_linecap, stroke_dasharray, stroke_linejoin, fill, fill_opacity, fill_rule);
-
-        if (attrName == "x"){
+        else if (attrName == "x"){
             x = stoi(attrValue);
         }
         else if (attrName == "y"){
@@ -107,42 +163,24 @@ RawElement* GetSVG::parseRect(rapidxml::xml_node<> *node){
             height = stoi(attrValue);
         }
     }
-    Stroke strokeTemp(stroke, stroke_width, stroke_opacity, stroke_linecap, stroke_dasharray, stroke_linejoin);
-    Fill fillTemp(fill, fill_opacity, fill_rule);
-    Transform transformTemp(translate, scale, rotate);
-
-    return new Rectan(Gdiplus::Point(x, y), width, height, strokeTemp, fillTemp, transformTemp);
+    return new Rectan(Gdiplus::Point(x, y), width, height, stroke, fill, transform);
 }
 
 RawElement* GetSVG::parseCircle(rapidxml::xml_node<> *node){
-    std::string stroke = "";
-    int stroke_width = 1;
-    double stroke_opacity = 1;
-    std::string stroke_linecap = "butt";
-    std::vector<double> stroke_dasharray;
-    std::string stroke_linejoin = "miter";
-
-    std::string fill = "";
-    double fill_opacity = 1;
-    std::string fill_rule = "nonezero";
-
     int x = 0, y = 0, radius = 0;
 
-    Gdiplus::Point translate;
-    Gdiplus::Point scale;
-    double rotate = 0;
+    Stroke stroke = parseStroke(node->first_attribute());
+    Fill fill = parseFill(node->first_attribute());
+    Transform transform;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
         std::string attrName = attr->name();
         std::string attrValue = attr->value();
 
         if (attrName == "transform") {
-            this->processTransform(attrValue, translate, scale, rotate);
+            transform = parseTransform(attrValue);
         }
-
-        this->setData(attrName, attrValue, stroke, stroke_width, stroke_opacity, stroke_linecap, stroke_dasharray, stroke_linejoin, fill, fill_opacity, fill_rule);
-
-        if (attrName == "cx"){
+        else if (attrName == "cx"){
             x = stoi(attrValue);
         }
         else if (attrName == "cy"){
@@ -152,42 +190,24 @@ RawElement* GetSVG::parseCircle(rapidxml::xml_node<> *node){
             radius = stoi(attrValue);
         }
     }
-    Stroke strokeTemp(stroke, stroke_width, stroke_opacity, stroke_linecap, stroke_dasharray, stroke_linejoin);
-    Fill fillTemp(fill, fill_opacity, fill_rule);
-    Transform transformTemp(translate, scale, rotate);
-
-    return new Circle(Gdiplus::Point(x, y), radius, strokeTemp, fillTemp, transformTemp);
+    return new Circle(Gdiplus::Point(x, y), radius, stroke, fill, transform);
 }
 
 RawElement* GetSVG::parseEllipse(rapidxml::xml_node<> *node){
-    std::string stroke = "";
-    int stroke_width = 1;
-    double stroke_opacity = 1;
-    std::string stroke_linecap = "butt";
-    std::vector<double> stroke_dasharray;
-    std::string stroke_linejoin = "miter";
-
-    std::string fill = "";
-    double fill_opacity = 1;
-    std::string fill_rule = "nonezero";
-
     int x = 0, y = 0, rx = 0, ry = 0;
 
-    Gdiplus::Point translate;
-    Gdiplus::Point scale;
-    double rotate = 0;
-
+    Stroke stroke = parseStroke(node->first_attribute());
+    Fill fill = parseFill(node->first_attribute());
+    Transform transform;
+    
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
         std::string attrName = attr->name();
         std::string attrValue = attr->value();
 
         if (attrName == "transform") {
-            this->processTransform(attrValue, translate, scale, rotate);
+            transform = parseTransform(attrValue);
         }
-
-        this->setData(attrName, attrValue, stroke, stroke_width, stroke_opacity, stroke_linecap, stroke_dasharray, stroke_linejoin, fill, fill_opacity, fill_rule);
-
-        if (attrName == "cx"){
+        else if (attrName == "cx"){
             x = stoi(attrValue);
         }
         else if (attrName == "cy"){
@@ -200,120 +220,71 @@ RawElement* GetSVG::parseEllipse(rapidxml::xml_node<> *node){
             ry = stoi(attrValue);
         }
     }
-    Stroke strokeTemp(stroke, stroke_width, stroke_opacity, stroke_linecap, stroke_dasharray, stroke_linejoin);
-    Fill fillTemp(fill, fill_opacity, fill_rule);
-    Transform transformTemp(translate, scale, rotate);
 
-    return new Ellip(Gdiplus::Point(x, y), rx, ry, strokeTemp, fillTemp, transformTemp);
+    return new Ellip(Gdiplus::Point(x, y), rx, ry, stroke, fill, transform);
 }
 
 RawElement* GetSVG::parsePolygon(rapidxml::xml_node<> *node){
-    std::string stroke = "";
-    int stroke_width = 1;
-    double stroke_opacity = 1;
-    std::string stroke_linecap = "butt";
-    std::vector<double> stroke_dasharray;
-    std::string stroke_linejoin = "miter";
-
-    std::string fill = "";
-    double fill_opacity = 1;
-    std::string fill_rule = "nonezero";
-
     std::string points = "";
 
-    Gdiplus::Point translate;
-    Gdiplus::Point scale;
-    double rotate = 0;
+    Stroke stroke = parseStroke(node->first_attribute());
+    Fill fill = parseFill(node->first_attribute());
+    Transform transform;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
         std::string attrName = attr->name();
         std::string attrValue = attr->value();
 
         if (attrName == "transform") {
-            this->processTransform(attrValue, translate, scale, rotate);
+            transform = parseTransform(attrValue);
         }
-
-        this->setData(attrName, attrValue, stroke, stroke_width, stroke_opacity, stroke_linecap, stroke_dasharray, stroke_linejoin, fill, fill_opacity, fill_rule);
-
-        if (attrName == "points"){
+        else if (attrName == "points"){
             points = attrValue;
+            standardizeString(points);
         }
     }
-    Stroke strokeTemp(stroke, stroke_width, stroke_opacity, stroke_linecap, stroke_dasharray, stroke_linejoin);
-    Fill fillTemp(fill, fill_opacity, fill_rule);
-    Transform transformTemp(translate, scale, rotate);
-
-    return new PolyGon(points, strokeTemp, fillTemp, transformTemp);
+    
+    return new PolyGon(points, stroke, fill, transform);
 }
 
 RawElement* GetSVG::parsePolyline(rapidxml::xml_node<> *node){
-    std::string stroke = "";
-    int stroke_width = 1;
-    double stroke_opacity = 1;
-    std::string stroke_linecap = "butt";
-    std::vector<double> stroke_dasharray;
-    std::string stroke_linejoin = "miter";
-
-    std::string fill = "";
-    double fill_opacity = 1;
-    std::string fill_rule = "nonezero";
-
     std::string points = "";
 
-    Gdiplus::Point translate;
-    Gdiplus::Point scale;
-    double rotate = 0;
+    Stroke stroke = parseStroke(node->first_attribute());
+    Fill fill = parseFill(node->first_attribute());
+    Transform transform;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
         std::string attrName = attr->name();
         std::string attrValue = attr->value();
 
         if (attrName == "transform") {
-            this->processTransform(attrValue, translate, scale, rotate);
+            transform = parseTransform(attrValue);
         }
-
-        this->setData(attrName, attrValue, stroke, stroke_width, stroke_opacity, stroke_linecap, stroke_dasharray, stroke_linejoin, fill, fill_opacity, fill_rule);
-
-        if (attrName == "points"){
+        else if (attrName == "points"){
             points = attrValue;
+            standardizeString(points);
         }
     }
-    Stroke strokeTemp(stroke, stroke_width, stroke_opacity, stroke_linecap, stroke_dasharray, stroke_linejoin);
-    Fill fillTemp(fill, fill_opacity, fill_rule);
-    Transform transformTemp(translate, scale, rotate);
 
-    return new PolyLine(points, strokeTemp, fillTemp, transformTemp);
+    return new PolyLine(points, stroke, fill, transform);
 }
 
 RawElement* GetSVG::parseLine(rapidxml::xml_node<> *node){
-    std::string stroke = "";
-    int stroke_width = 1;
-    double stroke_opacity = 1;
-    std::string stroke_linecap = "butt";
-    std::vector<double> stroke_dasharray;
-    std::string stroke_linejoin = "miter";
-
-    std::string fill = "";
-    double fill_opacity = 1;
-    std::string fill_rule = "nonezero";
-
     int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
 
-    Gdiplus::Point translate;
-    Gdiplus::Point scale;
-    double rotate = 0;
+    Stroke stroke = parseStroke(node->first_attribute());
+    Fill fill = parseFill(node->first_attribute());
+    Transform transform;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
         std::string attrName = attr->name();
         std::string attrValue = attr->value();
 
         if (attrName == "transform") {
-            this->processTransform(attrValue, translate, scale, rotate);
+            transform = parseTransform(attrValue);
         }
-
-        this->setData(attrName, attrValue, stroke, stroke_width, stroke_opacity, stroke_linecap, stroke_dasharray, stroke_linejoin, fill, fill_opacity, fill_rule);
-
-        if (attrName == "x1"){
+        else if (attrName == "x1"){
             x1 = stoi(attrValue);
         }
         else if (attrName == "y1"){
@@ -326,43 +297,26 @@ RawElement* GetSVG::parseLine(rapidxml::xml_node<> *node){
             y2 = stoi(attrValue);
         }
     }
-    Stroke strokeTemp(stroke, stroke_width, stroke_opacity, stroke_linecap, stroke_dasharray, stroke_linejoin);
-    Fill fillTemp(fill, fill_opacity, fill_rule);
-    Transform transformTemp(translate, scale, rotate);
 
-    return new Line(Gdiplus::Point(x1, y1), Gdiplus::Point(x2, y2), strokeTemp, fillTemp, transformTemp);
+    return new Line(Gdiplus::Point(x1, y1), Gdiplus::Point(x2, y2), stroke, fill, transform);
 }
 
 RawElement* GetSVG::parseText(rapidxml::xml_node<> *node){
-    std::string stroke = "";
-    int stroke_width = 1;
-    double stroke_opacity = 0;
-    std::string stroke_linecap = "butt";
-    std::vector<double> stroke_dasharray;
-    std::string stroke_linejoin = "miter";
-
-    std::string fill = "";
-    double fill_opacity = 1;
-    std::string fill_rule = "nonezero";
-
     std::string content = node->value();
     int x = 0, y = 0, font_size = 16;
 
-    Gdiplus::Point translate;
-    Gdiplus::Point scale;
-    double rotate = 0;
+    Stroke stroke = parseStroke(node->first_attribute());
+    Fill fill = parseFill(node->first_attribute());
+    Transform transform;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
         std::string attrName = attr->name();
         std::string attrValue = attr->value();
 
         if (attrName == "transform") {
-            this->processTransform(attrValue, translate, scale, rotate);
+            transform = parseTransform(attrValue);
         }
-
-        this->setData(attrName, attrValue, stroke, stroke_width, stroke_opacity, stroke_linecap, stroke_dasharray, stroke_linejoin, fill, fill_opacity, fill_rule);
-
-        if (attrName == "x"){
+        else if (attrName == "x"){
             x = stoi(attrValue);
         }
         else if (attrName == "y"){
@@ -372,28 +326,14 @@ RawElement* GetSVG::parseText(rapidxml::xml_node<> *node){
             font_size = stoi(attrValue);
         }
     }
-    Stroke strokeTemp(stroke, stroke_width, stroke_opacity, stroke_linecap, stroke_dasharray, stroke_linejoin);
-    Fill fillTemp(fill, fill_opacity, fill_rule);
-    Transform transformTemp(translate, scale, rotate);
 
-    return new Text(content, Gdiplus::Point(x, y), font_size, strokeTemp, fillTemp, transformTemp);
+    return new Text(content, Gdiplus::Point(x, y), font_size, stroke, fill, transform);
 }
 
 RawElement* GetSVG::parseGroup(rapidxml::xml_node<> *node) {
-    std::string stroke = "";
-    int stroke_width = 1;
-    double stroke_opacity = 0;
-    std::string stroke_linecap = "butt";
-    std::vector<double> stroke_dasharray;
-    std::string stroke_linejoin = "miter";
-
-    std::string fill = "";
-    double fill_opacity = 1;
-    std::string fill_rule = "nonezero";
-
-    Gdiplus::Point translate;
-    Gdiplus::Point scale;
-    double rotate = 0;
+    Stroke stroke = parseStroke(node->first_attribute());
+    Fill fill = parseFill(node->first_attribute());
+    Transform transform;
 
     std::vector<RawElement*> vec;
 
@@ -402,10 +342,7 @@ RawElement* GetSVG::parseGroup(rapidxml::xml_node<> *node) {
         std::string attrValue = attr->value();
 
         if (attrName == "transform") {
-            this->processTransform(attrValue, translate, scale, rotate);
-        }
-        else {
-            this->setData(attrName, attrValue, stroke, stroke_width, stroke_opacity, stroke_linecap, stroke_dasharray, stroke_linejoin, fill, fill_opacity, fill_rule);
+            transform = parseTransform(attrValue);
         }
     }
 
@@ -449,138 +386,145 @@ RawElement* GetSVG::parseGroup(rapidxml::xml_node<> *node) {
         }
     }
     
-    Stroke strokeTemp(stroke, stroke_width, stroke_opacity, stroke_linecap, stroke_dasharray, stroke_linejoin);
-    Fill fillTemp(fill, fill_opacity, fill_rule);
-    Transform transformTemp(translate, scale, rotate);
-
-    return new Group(vec, strokeTemp, fillTemp, transformTemp);
+    return new Group(vec, stroke, fill, transform);
 }
 
-bool GetSVG::checkAlpha(char ch) {
+bool GetSVG::checkAlpha(char ch){
     return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z'); 
 }
 
-void GetSVG::parsePathData(const std::string& Data, std::vector<std::pair<char, Gdiplus::Point>>& pathData) {
-    std::string d = Data + 'E';
-    int n = d.size();
-    int i = 0;
-    while (i < n) {
-        char ch = d[i];
-        if (ch == 'M' || ch == 'm' || ch == 'L' || ch == 'l') {
-            bool check = true;
-            std::string x, y;
+void GetSVG::standardizeString(std::string& s){
+    std::replace(s.begin(), s.end(), ',', ' ');
+    int n = s.size();
+    // Case: Command with no space at first
+    if (n > 1 && checkAlpha(s[0]) && s[1] != ' '){
+        s.insert(s.begin() + 1, ' ');
+        n++;
+    }
+    for (int i = 1; i < n; i++){
+        // It will always start with something else than '-' so no segmentation fault
+        if ((s[i] == '-') && s[i - 1] != ' '){
+            s.insert(s.begin() + i, ' ');
             i++;
-            while (!this->checkAlpha(d[i])) {
-                if (d[i] == ',') {
-                    check = false;
-                }
-                else if (check) {
-                    x += d[i];
-                }
-                else {
-                    y += d[i];
-                }
+            n++;
+        }
+        else if (checkAlpha(s[i])){
+            int curPos = i;
+            if (s[curPos + 1] != ' '){
+                s.insert(s.begin() + curPos + 1, ' ');
                 i++;
+                n++;
             }
-            pathData.push_back(std::pair(ch, Gdiplus::Point(stoi(x), stoi(y))));
-            i--;
-        }
-        else if (ch == 'C' || ch == 'c') {
-            i++;
-            int j = i;
-            while (this->checkAlpha(j)) {
-                j++;
-            }
-            int len = j - i;
-            std::string temp = d.substr(i, len);
-
-            std::stringstream ss(temp);
-
-            int x1, y1, x2, y2, x3, y3;
-            ss >> x1;
-            ss.ignore();
-            ss >> y1;
-            ss.ignore();
-            ss >> x2;
-            ss.ignore();
-            ss >> y2;
-            ss.ignore();
-            ss >> x3;
-            ss.ignore();
-            ss >> y3;
-
-            pathData.push_back(std::pair(ch, Gdiplus::Point(x1, y1)));
-            pathData.push_back(std::pair(ch, Gdiplus::Point(x2, y2)));
-            pathData.push_back(std::pair(ch, Gdiplus::Point(x3, y3)));
-        }
-        else if (ch == 'H' || ch == 'h' || ch == 'V' || ch == 'v') {
-            i++;
-            std::string temp;
-            while (!this->checkAlpha(d[i])) {
-                temp += d[i];
+            if (s[curPos - 1] != ' '){
+                s.insert(s.begin() + curPos, ' ');
                 i++;
+                n++;
             }
-            if (ch == 'H' || ch == 'h') {
-                pathData.push_back(std::pair(ch, Gdiplus::Point(stoi(temp), 0)));
-            }
-            else {
-                pathData.push_back(std::pair(ch, Gdiplus::Point(0, stoi(temp))));
-            }
-            i--;
         }
-        else if (ch == 'Z' || ch == 'z') {
-            pathData.push_back(std::pair(ch, Gdiplus::Point(0, 0)));
-        }
-        i++;
     }
 }
 
+std::vector<std::pair<char, Gdiplus::Point>> GetSVG::parsePathData(rapidxml::xml_attribute<> *attr){
+    std::vector<std::pair<char, Gdiplus::Point>> pathData;
+    std::string d = attr->value();
+    standardizeString(d);
+    std::stringstream ss(d);
+    std::string val;
+    char curCommand = 'M'; // Init default value
+    while (ss >> val){
+        if (checkAlpha(val[0])){
+            curCommand = val[0];
+            if (curCommand == 'M' || curCommand == 'm' || curCommand == 'L' || curCommand == 'l'){
+                double x, y;
+                ss >> x >> y;
+                pathData.push_back(std::make_pair(curCommand, Gdiplus::Point(x, y)));
+            }
+            else if (curCommand == 'C' || curCommand == 'c'){
+                double x, y;
+                for (int i = 0; i < 3; i++){
+                    ss >> x >> y;
+                    pathData.push_back(std::make_pair(curCommand, Gdiplus::Point(x, y)));
+                }
+            }
+            else if (curCommand == 'H' || curCommand == 'h' || curCommand == 'V' || curCommand == 'v') {
+                double stat;
+                ss >> stat;
+                if (curCommand == 'H' || curCommand == 'h') {
+                    pathData.push_back(std::make_pair(curCommand, Gdiplus::Point(stat, 0)));
+                }
+                else {
+                    pathData.push_back(std::make_pair(curCommand, Gdiplus::Point(0, stat)));
+                }
+            }
+            else if (curCommand == 'Z' || curCommand == 'z') {
+                pathData.push_back(std::make_pair(curCommand, Gdiplus::Point(0, 0)));
+            }
+        }
+        else{
+            if (curCommand == 'M' || curCommand == 'm' || curCommand == 'L' || curCommand == 'l'){
+                double x, y;
+                x = stod(val);
+                ss >> y;
+                pathData.push_back(std::make_pair(curCommand, Gdiplus::Point(x, y)));
+            }
+            else if (curCommand == 'C' || curCommand == 'c'){
+                double x, y;
+                for (int i = 0; i < 3; i++){
+                    if (i != 0){
+                        ss >> x >> y;
+                    }
+                    else{
+                        x = stod(val);
+                        ss >> y;
+                    }
+                    pathData.push_back(std::make_pair(curCommand, Gdiplus::Point(x, y)));
+                }
+            }
+            else if (curCommand == 'H' || curCommand == 'h' || curCommand == 'V' || curCommand == 'v') {
+                double stat;
+                stat = stod(val);
+                if (curCommand == 'H' || curCommand == 'h') {
+                    pathData.push_back(std::make_pair(curCommand, Gdiplus::Point(stat, 0)));
+                }
+                else {
+                    pathData.push_back(std::make_pair(curCommand, Gdiplus::Point(0, stat)));
+                }
+            }
+        }
+    }
+    return pathData;
+}
+
 RawElement* GetSVG::parsePath(rapidxml::xml_node<> *node) {
-    std::string stroke = "";
-    int stroke_width = 1;
-    double stroke_opacity = 0;
-    std::string stroke_linecap = "butt";
-    std::vector<double> stroke_dasharray;
-    std::string stroke_linejoin = "miter";
-
-    std::string fill = "";
-    double fill_opacity = 1;
-    std::string fill_rule = "nonezero";
-
-    Gdiplus::Point translate;
-    Gdiplus::Point scale;
-    double rotate = 0;
+    Stroke stroke = parseStroke(node->first_attribute());
+    Fill fill = parseFill(node->first_attribute());
+    Transform transform;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
         std::string attrName = attr->name();
         std::string attrValue = attr->value();
 
         if (attrName == "transform") {
-            this->processTransform(attrValue, translate, scale, rotate);
+            transform = parseTransform(attrValue);
         }
-
-        this->setData(attrName, attrValue, stroke, stroke_width, stroke_opacity, stroke_linecap, stroke_dasharray, stroke_linejoin, fill, fill_opacity, fill_rule);
     }
 
     rapidxml::xml_attribute<> *d_attr = node->first_attribute("d");
     std::vector<std::pair<char, Gdiplus::Point>> pathData;
-    if (d_attr) {
-        std::string d = node->first_attribute("d")->value();
-        parsePathData(d, pathData);
+
+    if (d_attr){
+        pathData = parsePathData(d_attr);
     }
 
-    Stroke strokeTemp(stroke, stroke_width, stroke_opacity, stroke_linecap, stroke_dasharray, stroke_linejoin);
-    Fill fillTemp(fill, fill_opacity, fill_rule);
-    Transform transformTemp(translate, scale, rotate);
-
-    return new Path(pathData, strokeTemp, fillTemp, transformTemp);
+    return new Path(pathData, stroke, fill, transform);
 }
 
-void GetSVG::parseSVGFile(std::vector<RawElement*>& vec, const std::string& filePath){
+std::vector<RawElement*> GetSVG::parseSVGFile(const std::string& filePath){
+    std::vector<RawElement*> vec;
     std::ifstream svgFile(filePath);
     if (!svgFile) {
         std::cout << "Error: Could not open SVG file.\n";
-        return;
+        return vec;
     }
 
     std::string svgContent((std::istreambuf_iterator<char>(svgFile)), std::istreambuf_iterator<char>());
@@ -636,4 +580,5 @@ void GetSVG::parseSVGFile(std::vector<RawElement*>& vec, const std::string& file
     }
 
     delete[] xml;
+    return vec;
 }

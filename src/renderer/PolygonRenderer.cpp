@@ -11,8 +11,14 @@ PolygonRenderer::PolygonRenderer(const Fill& fill, const Stroke& stroke, const T
 }
 
 void PolygonRenderer::render(Gdiplus::Graphics& graphics) const {
+    Gdiplus::Matrix originalMatrix;
+    graphics.GetTransform(&originalMatrix);
+    graphics.MultiplyTransform(matrix);
+  
     graphics.FillPolygon(brush, points, count);
     graphics.DrawPolygon(pen, points, count);
+
+    graphics.SetTransform(&originalMatrix);
 }
 
 PolygonRenderer::~PolygonRenderer(){

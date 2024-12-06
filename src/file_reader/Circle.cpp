@@ -14,7 +14,7 @@ int Circle::getRadius() const{
     return radius;
 }
 
-ElementType Circle::getType() const {
+ElementType Circle::getType() const{
     return ElementType::CIRCLE;
 }
 

@@ -6,7 +6,7 @@
 #include <vector>
 #include <windows.h>
 #include <Gdiplus.h>
-#include "function.h"
+#include "SVGColor.h"
 
 class Stroke{
 private:

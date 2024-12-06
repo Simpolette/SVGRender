@@ -7,6 +7,7 @@
 #include <windows.h>
 #include <Gdiplus.h>
 #include <sstream>
+#include <algorithm>
 
 #include "RawElement.h"
 #include "Circle.h"
@@ -24,6 +25,12 @@
 class GetSVG {
 private:
     bool checkAlpha(char ch);
+    bool checkNumber(char ch);
+    void standardizeString(std::string& s);
+    int countAttrVal(const std::string& attrValue);
+    Stroke parseStroke(rapidxml::xml_attribute<> *attr);
+    Fill parseFill(rapidxml::xml_attribute<> *attr);
+    Transform parseTransform(const std::string& transformVal);
     RawElement* parseRect(rapidxml::xml_node<> *node);
     RawElement* parseCircle(rapidxml::xml_node<> *node);
     RawElement* parseEllipse(rapidxml::xml_node<> *node);
@@ -32,13 +39,11 @@ private:
     RawElement* parseLine(rapidxml::xml_node<> *node);
     RawElement* parseText(rapidxml::xml_node<> *node);
     RawElement* parseGroup(rapidxml::xml_node<> * node);
-    void parsePathData(const std::string& d, std::vector<std::pair<char, Gdiplus::Point>>& pathData);
     RawElement* parsePath(rapidxml::xml_node<> *node);
-    void processTransform(const std::string& transformValue, Gdiplus::Point &translate, Gdiplus::Point &scale, double rotate);
+    std::vector<std::pair<char, Gdiplus::Point>> parsePathData(rapidxml::xml_attribute<> *attr);
 
-    void setData(const std::string& attrName, const std::string& attrValue, std::string& stroke, int& stroke_width, double& stroke_opacity, std::string& stroke_linecap, std::vector<double>& stroke_dasharray, std::string& stroke_linejoin, std::string& fill, double& fill_opacity, std::string& fill_rule);
 public:
-    void parseSVGFile(std::vector<RawElement*>& vec, const std::string& filePath);
+    std::vector<RawElement*> parseSVGFile(const std::string& filePath);
 };
 
 #endif

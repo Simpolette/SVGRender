@@ -4,11 +4,9 @@ PolyGon::PolyGon(std::string points, const Stroke& stroke, const Fill& fill, con
 : RawElement(stroke, fill, transform) {
     if (points != ""){
         std::istringstream iss(points);
-        std::string temp;
-        while (getline(iss, temp, ',')){
-            int x = stoi(temp);
-            getline(iss, temp, ' ');
-            int y = stoi(temp);
+        double x, y;
+        while (iss >> x){
+            iss >> y;
             Gdiplus::Point coord(x, y);
             this->points.push_back(coord);
         }

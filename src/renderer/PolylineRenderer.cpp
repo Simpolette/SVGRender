@@ -11,12 +11,19 @@ PolylineRenderer::PolylineRenderer(const Fill& fill, const Stroke& stroke, const
 }
 
 void PolylineRenderer::render(Gdiplus::Graphics& graphics) const {
+
+    Gdiplus::Matrix originalMatrix;
+    graphics.GetTransform(&originalMatrix);
+    graphics.MultiplyTransform(matrix);
+ 
     Gdiplus::GraphicsPath polyline;
     polyline.StartFigure();
     polyline.AddLines(points, count);
 
     graphics.FillPath(brush, &polyline);
     graphics.DrawPath(pen, &polyline);
+
+    graphics.SetTransform(&originalMatrix);
 }
 
 PolylineRenderer::~PolylineRenderer(){

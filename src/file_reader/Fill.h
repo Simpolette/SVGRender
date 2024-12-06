@@ -5,7 +5,7 @@
 #include <sstream>
 #include <windows.h>
 #include <Gdiplus.h>
-#include "function.h"
+#include "SVGColor.h"
 
 class Fill{
 private:

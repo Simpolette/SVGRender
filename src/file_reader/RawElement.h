@@ -35,6 +35,7 @@ public:
     Fill getFill() const;
     Stroke getStroke() const;
     Transform getTransform() const;
+    void setTransform(Transform trans);
     virtual void print() const;
     RawElement();
     RawElement(const Stroke& stroke, const Fill& fill, const Transform& transform);

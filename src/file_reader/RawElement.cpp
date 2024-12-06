@@ -24,6 +24,10 @@ Transform RawElement::getTransform() const {
     return this->transform;
 }
 
+void RawElement::setTransform(Transform trans) {
+    this->transform = trans;
+}
+
 void RawElement::print() const{
     stroke.print();
     fill.print();
