@@ -37,7 +37,7 @@ VOID OnPaint(HDC hdc)
 
 
    GetSVG getSVG;
-   std::vector<RawElement*> vec = getSVG.parseSVGFile("../assets/sample4.svg");
+   std::vector<RawElement*> vec = getSVG.parseSVGFile("../assets/svg-04.svg");
    int n = vec.size();
 
    for (int i = 0; i < n; i++){
