@@ -94,7 +94,6 @@ void PathRenderer::render(Gdiplus::Graphics& graphics) const {
         }
     }
 
-    pathGraphics.CloseAllFigures();
     // Vẽ hình theo đường path đã tạo ra
     graphics.FillPath(brush, &pathGraphics);  // Tô màu path
     graphics.DrawPath(pen, &pathGraphics);    // Vẽ đường viền path
