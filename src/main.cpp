@@ -41,8 +41,7 @@ VOID OnPaint(HDC hdc)
    int n = vec.size();
 
    for (int i = 0; i < n; i++){
-      if (vec[i]->getType() == ElementType::GROUP)
-         vec[i]->print();
+      vec[i]->print();
       Renderer* render = RendererFactory::createRenderer(vec[i]);
       render->render(graphics);
       
