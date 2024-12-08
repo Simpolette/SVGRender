@@ -37,11 +37,12 @@ VOID OnPaint(HDC hdc)
 
 
    GetSVG getSVG;
-   std::vector<RawElement*> vec = getSVG.parseSVGFile("../assets/svg-02.svg");
+   std::vector<RawElement*> vec = getSVG.parseSVGFile("../assets/svg-18.svg");
    int n = vec.size();
 
    for (int i = 0; i < n; i++){
-      vec[i]->print();
+      if (vec[i]->getType() == ElementType::GROUP)
+         vec[i]->print();
       Renderer* render = RendererFactory::createRenderer(vec[i]);
       render->render(graphics);
       

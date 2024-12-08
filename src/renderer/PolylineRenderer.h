@@ -6,7 +6,7 @@
 class PolylineRenderer : public Renderer {
 
 private:
-    Gdiplus::Point* points;
+    Gdiplus::PointF* points;
     int count;
 
 public:

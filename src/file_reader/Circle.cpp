@@ -1,12 +1,12 @@
 #include "Circle.h"
 
-Circle::Circle(Gdiplus::Point coord, int radius, const Stroke& stroke, const Fill& fill, const Transform& transform)
+Circle::Circle(Gdiplus::PointF coord, int radius, const Stroke& stroke, const Fill& fill, const Transform& transform)
 : RawElement(stroke, fill, transform) {
     this->coord = coord;
     this->radius = radius;
 }
 
-Gdiplus::Point Circle::getPoint() const{
+Gdiplus::PointF Circle::getPoint() const{
     return coord;
 }
 

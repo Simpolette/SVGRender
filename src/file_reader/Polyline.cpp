@@ -7,13 +7,13 @@ PolyLine::PolyLine(std::string points, const Stroke& stroke, const Fill& fill, c
         double x, y;
         while (iss >> x){
             iss >> y;
-            Gdiplus::Point coord(x, y);
+            Gdiplus::PointF coord(x, y);
             this->points.push_back(coord);
         }
     }
 }
 
-std::vector<Gdiplus::Point> PolyLine::getPoints() const {
+std::vector<Gdiplus::PointF> PolyLine::getPoints() const {
     return points;
 }
 

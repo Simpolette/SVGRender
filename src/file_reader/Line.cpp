@@ -1,16 +1,16 @@
 #include "Line.h"
 
-Line::Line(Gdiplus::Point p1, Gdiplus::Point p2, const Stroke& stroke, const Fill& fill, const Transform& transform)
+Line::Line(Gdiplus::PointF p1, Gdiplus::PointF p2, const Stroke& stroke, const Fill& fill, const Transform& transform)
 : RawElement(stroke, fill, transform) {
     this->p1 = p1;
     this->p2 = p2;
 }
 
-Gdiplus::Point Line::getPointStart() const {
+Gdiplus::PointF Line::getPointStart() const {
     return p1;
 }
 
-Gdiplus::Point Line::getPointEnd() const {
+Gdiplus::PointF Line::getPointEnd() const {
     return p2;
 }
 

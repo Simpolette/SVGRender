@@ -13,7 +13,7 @@ private:
     // Gdiplus::FontFamily family;
     int style;
     Gdiplus::REAL emSize;
-    Gdiplus::Point origin;
+    Gdiplus::PointF origin;
     Gdiplus::StringFormat format;
 
 public:

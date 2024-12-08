@@ -69,7 +69,7 @@ Fill GetSVG::parseFill(rapidxml::xml_attribute<> *attr){
 }
 
 bool GetSVG::checkNumber(char ch){
-    return ch >= '0' && ch <= '9';
+    return (ch >= '0' && ch <= '9') || ch == '-';
 }
 
 int GetSVG::countAttrVal(const std::string& attrValue){
@@ -87,8 +87,8 @@ int GetSVG::countAttrVal(const std::string& attrValue){
 }
 
 Transform GetSVG::parseTransform(const std::string& transformVal){
-    Gdiplus::Point translate;
-    Gdiplus::Point scale(1, 1);
+    Gdiplus::PointF translate;
+    Gdiplus::PointF scale(1, 1);
     double rotate = 0;
 
     std::istringstream ss(transformVal);
@@ -109,7 +109,7 @@ Transform GetSVG::parseTransform(const std::string& transformVal){
         if (attrName.find("translate") != std::string::npos){
             double x, y;
             ss3 >> x >> y;
-            translate = Gdiplus::Point(x, y);
+            translate = Gdiplus::PointF(x, y);
         }
         else if (attrName.find("scale") != std::string::npos){
             double x, y;
@@ -120,7 +120,7 @@ Transform GetSVG::parseTransform(const std::string& transformVal){
             if (cnt >= 2){
                 ss3 >> y;
             }
-            scale = Gdiplus::Point(x, y);
+            scale = Gdiplus::PointF(x, y);
         }
         else if (attrName.find("rotate") != std::string::npos){
             double x, y;
@@ -137,8 +137,8 @@ Transform GetSVG::parseTransform(const std::string& transformVal){
 }
 
 RawElement* GetSVG::parseRect(rapidxml::xml_node<> *node){
-    int x = 0, y = 0, width = 0, height = 0;
-
+    int width = 0, height = 0;
+    double x = 0, y = 0;
     Stroke stroke = parseStroke(node->first_attribute());
     Fill fill = parseFill(node->first_attribute());
     Transform transform;
@@ -151,10 +151,10 @@ RawElement* GetSVG::parseRect(rapidxml::xml_node<> *node){
             transform = parseTransform(attrValue);
         }
         else if (attrName == "x"){
-            x = stoi(attrValue);
+            x = stod(attrValue);
         }
         else if (attrName == "y"){
-            y = stoi(attrValue);
+            y = stod(attrValue);
         }
         else if (attrName == "width"){
             width = stoi(attrValue);
@@ -163,12 +163,12 @@ RawElement* GetSVG::parseRect(rapidxml::xml_node<> *node){
             height = stoi(attrValue);
         }
     }
-    return new Rectan(Gdiplus::Point(x, y), width, height, stroke, fill, transform);
+    return new Rectan(Gdiplus::PointF(x, y), width, height, stroke, fill, transform);
 }
 
 RawElement* GetSVG::parseCircle(rapidxml::xml_node<> *node){
-    int x = 0, y = 0, radius = 0;
-
+    int radius = 0;
+    double x = 0, y = 0;
     Stroke stroke = parseStroke(node->first_attribute());
     Fill fill = parseFill(node->first_attribute());
     Transform transform;
@@ -181,21 +181,21 @@ RawElement* GetSVG::parseCircle(rapidxml::xml_node<> *node){
             transform = parseTransform(attrValue);
         }
         else if (attrName == "cx"){
-            x = stoi(attrValue);
+            x = stod(attrValue);
         }
         else if (attrName == "cy"){
-            y = stoi(attrValue);
+            y = stod(attrValue);
         }
         else if (attrName == "r"){
             radius = stoi(attrValue);
         }
     }
-    return new Circle(Gdiplus::Point(x, y), radius, stroke, fill, transform);
+    return new Circle(Gdiplus::PointF(x, y), radius, stroke, fill, transform);
 }
 
 RawElement* GetSVG::parseEllipse(rapidxml::xml_node<> *node){
-    int x = 0, y = 0, rx = 0, ry = 0;
-
+    int rx = 0, ry = 0;
+    double x = 0, y = 0;
     Stroke stroke = parseStroke(node->first_attribute());
     Fill fill = parseFill(node->first_attribute());
     Transform transform;
@@ -208,10 +208,10 @@ RawElement* GetSVG::parseEllipse(rapidxml::xml_node<> *node){
             transform = parseTransform(attrValue);
         }
         else if (attrName == "cx"){
-            x = stoi(attrValue);
+            x = stod(attrValue);
         }
         else if (attrName == "cy"){
-            y = stoi(attrValue);
+            y = stod(attrValue);
         }
         else if (attrName == "rx"){
             rx = stoi(attrValue);
@@ -221,7 +221,7 @@ RawElement* GetSVG::parseEllipse(rapidxml::xml_node<> *node){
         }
     }
 
-    return new Ellip(Gdiplus::Point(x, y), rx, ry, stroke, fill, transform);
+    return new Ellip(Gdiplus::PointF(x, y), rx, ry, stroke, fill, transform);
 }
 
 RawElement* GetSVG::parsePolygon(rapidxml::xml_node<> *node){
@@ -271,7 +271,7 @@ RawElement* GetSVG::parsePolyline(rapidxml::xml_node<> *node){
 }
 
 RawElement* GetSVG::parseLine(rapidxml::xml_node<> *node){
-    int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+    double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
 
     Stroke stroke = parseStroke(node->first_attribute());
     Fill fill = parseFill(node->first_attribute());
@@ -285,26 +285,26 @@ RawElement* GetSVG::parseLine(rapidxml::xml_node<> *node){
             transform = parseTransform(attrValue);
         }
         else if (attrName == "x1"){
-            x1 = stoi(attrValue);
+            x1 = stod(attrValue);
         }
         else if (attrName == "y1"){
-            y1 = stoi(attrValue);
+            y1 = stod(attrValue);
         }
         else if (attrName == "x2"){
-            x2 = stoi(attrValue);
+            x2 = stod(attrValue);
         }
         else if (attrName == "y2"){
-            y2 = stoi(attrValue);
+            y2 = stod(attrValue);
         }
     }
 
-    return new Line(Gdiplus::Point(x1, y1), Gdiplus::Point(x2, y2), stroke, fill, transform);
+    return new Line(Gdiplus::PointF(x1, y1), Gdiplus::PointF(x2, y2), stroke, fill, transform);
 }
 
 RawElement* GetSVG::parseText(rapidxml::xml_node<> *node){
     std::string content = node->value();
-    int x = 0, y = 0, font_size = 16;
-
+    int font_size = 16;
+    double x = 0, y = 0;
     Stroke stroke = parseStroke(node->first_attribute());
     Fill fill = parseFill(node->first_attribute());
     Transform transform;
@@ -317,17 +317,17 @@ RawElement* GetSVG::parseText(rapidxml::xml_node<> *node){
             transform = parseTransform(attrValue);
         }
         else if (attrName == "x"){
-            x = stoi(attrValue);
+            x = stod(attrValue);
         }
         else if (attrName == "y"){
-            y = stoi(attrValue);
+            y = stod(attrValue);
         }
         else if (attrName == "font-size"){
             font_size = stoi(attrValue);
         }
     }
 
-    return new Text(content, Gdiplus::Point(x, y), font_size, stroke, fill, transform);
+    return new Text(content, Gdiplus::PointF(x, y), font_size, stroke, fill, transform);
 }
 
 RawElement* GetSVG::parseGroup(rapidxml::xml_node<> *node, rapidxml::xml_document<>& doc) {
@@ -445,8 +445,8 @@ void GetSVG::standardizeString(std::string& s){
     }
 }
 
-std::vector<std::pair<char, Gdiplus::Point>> GetSVG::parsePathData(rapidxml::xml_attribute<> *attr){
-    std::vector<std::pair<char, Gdiplus::Point>> pathData;
+std::vector<std::pair<char, Gdiplus::PointF>> GetSVG::parsePathData(rapidxml::xml_attribute<> *attr){
+    std::vector<std::pair<char, Gdiplus::PointF>> pathData;
     std::string d = attr->value();
     standardizeString(d);
     std::stringstream ss(d);
@@ -458,27 +458,27 @@ std::vector<std::pair<char, Gdiplus::Point>> GetSVG::parsePathData(rapidxml::xml
             if (curCommand == 'M' || curCommand == 'm' || curCommand == 'L' || curCommand == 'l'){
                 double x, y;
                 ss >> x >> y;
-                pathData.push_back(std::make_pair(curCommand, Gdiplus::Point(x, y)));
+                pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(x, y)));
             }
             else if (curCommand == 'C' || curCommand == 'c'){
                 double x, y;
                 for (int i = 0; i < 3; i++){
                     ss >> x >> y;
-                    pathData.push_back(std::make_pair(curCommand, Gdiplus::Point(x, y)));
+                    pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(x, y)));
                 }
             }
             else if (curCommand == 'H' || curCommand == 'h' || curCommand == 'V' || curCommand == 'v') {
                 double stat;
                 ss >> stat;
                 if (curCommand == 'H' || curCommand == 'h') {
-                    pathData.push_back(std::make_pair(curCommand, Gdiplus::Point(stat, 0)));
+                    pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(stat, 0)));
                 }
                 else {
-                    pathData.push_back(std::make_pair(curCommand, Gdiplus::Point(0, stat)));
+                    pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(0, stat)));
                 }
             }
             else if (curCommand == 'Z' || curCommand == 'z') {
-                pathData.push_back(std::make_pair(curCommand, Gdiplus::Point(0, 0)));
+                pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(0, 0)));
             }
         }
         else{
@@ -489,7 +489,7 @@ std::vector<std::pair<char, Gdiplus::Point>> GetSVG::parsePathData(rapidxml::xml
                 double x, y;
                 x = stod(val);
                 ss >> y;
-                pathData.push_back(std::make_pair(curCommand, Gdiplus::Point(x, y)));
+                pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(x, y)));
             }
             else if (curCommand == 'C' || curCommand == 'c'){
                 double x, y;
@@ -501,17 +501,17 @@ std::vector<std::pair<char, Gdiplus::Point>> GetSVG::parsePathData(rapidxml::xml
                         x = stod(val);
                         ss >> y;
                     }
-                    pathData.push_back(std::make_pair(curCommand, Gdiplus::Point(x, y)));
+                    pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(x, y)));
                 }
             }
             else if (curCommand == 'H' || curCommand == 'h' || curCommand == 'V' || curCommand == 'v') {
                 double stat;
                 stat = stod(val);
                 if (curCommand == 'H' || curCommand == 'h') {
-                    pathData.push_back(std::make_pair(curCommand, Gdiplus::Point(stat, 0)));
+                    pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(stat, 0)));
                 }
                 else {
-                    pathData.push_back(std::make_pair(curCommand, Gdiplus::Point(0, stat)));
+                    pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(0, stat)));
                 }
             }
         }
@@ -534,7 +534,7 @@ RawElement* GetSVG::parsePath(rapidxml::xml_node<> *node) {
     }
 
     rapidxml::xml_attribute<> *d_attr = node->first_attribute("d");
-    std::vector<std::pair<char, Gdiplus::Point>> pathData;
+    std::vector<std::pair<char, Gdiplus::PointF>> pathData;
 
     if (d_attr){
         pathData = parsePathData(d_attr);

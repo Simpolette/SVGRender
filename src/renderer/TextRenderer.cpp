@@ -6,7 +6,7 @@ TextRenderer::TextRenderer(const Fill& fill, const Stroke& stroke, const Transfo
     Gdiplus::FontFamily family(L"Times New Roman");
     int ascent = family.GetCellAscent(0);
     int emHeight = family.GetEmHeight(0);
-    Gdiplus::Point point = text.getPoint();
+    Gdiplus::PointF point = text.getPoint();
 
     content = converter.from_bytes(text.getContent());
     length = content.size();
@@ -15,7 +15,7 @@ TextRenderer::TextRenderer(const Fill& fill, const Stroke& stroke, const Transfo
     int ascentOffset = floor(emSize * (static_cast<Gdiplus::REAL>(ascent) / emHeight));
     int topLeftY = point.Y - ascentOffset;
 
-    origin = Gdiplus::Point(point.X, topLeftY);
+    origin = Gdiplus::PointF(point.X, topLeftY);
     format.SetAlignment(Gdiplus::StringAlignmentNear);
 }
 

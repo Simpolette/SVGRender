@@ -2,9 +2,9 @@
 
 PolygonRenderer::PolygonRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const PolyGon& polygon)
 : Renderer(fill, stroke, transform) {
-    std::vector<Gdiplus::Point> pointsVec = polygon.getPoints();
+    std::vector<Gdiplus::PointF> pointsVec = polygon.getPoints();
     count = pointsVec.size();
-    points = new Gdiplus::Point[count];
+    points = new Gdiplus::PointF[count];
     for (int i = 0; i < count; i++){
         points[i] = pointsVec[i];
     }

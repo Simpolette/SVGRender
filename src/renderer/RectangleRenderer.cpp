@@ -2,7 +2,7 @@
 
 RectangleRenderer::RectangleRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Rectan& rect)
 : Renderer(fill, stroke, transform) {
-    Gdiplus::Point coord = rect.getPoint();
+    Gdiplus::PointF coord = rect.getPoint();
     x = coord.X;
     y = coord.Y;
     width = rect.getWidth();

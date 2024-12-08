@@ -1,13 +1,13 @@
 #include "Ellipse.h"
 
-Ellip::Ellip(Gdiplus::Point coord, int rx, int ry, const Stroke& stroke, const Fill& fill, const Transform& transform) 
+Ellip::Ellip(Gdiplus::PointF coord, int rx, int ry, const Stroke& stroke, const Fill& fill, const Transform& transform) 
 : RawElement(stroke, fill, transform) {
     this->coord = coord;
     this->rx = rx;
     this->ry = ry;
 }
 
-Gdiplus::Point Ellip::getPoint() const {
+Gdiplus::PointF Ellip::getPoint() const {
     return coord;
 }
 

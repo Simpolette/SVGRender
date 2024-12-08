@@ -6,15 +6,15 @@
 class Text : public RawElement {
 private:
     std::string content;
-    Gdiplus::Point coord;
+    Gdiplus::PointF coord;
     int font_size;
 public:
     std::string getContent() const;
-    Gdiplus::Point getPoint() const;
+    Gdiplus::PointF getPoint() const;
     int getFontSize() const;
     ElementType getType() const;
     void print() const override;
-    Text(std::string content, Gdiplus::Point coord, int font_size, const Stroke& stroke, const Fill& fill, const Transform& transform);
+    Text(std::string content, Gdiplus::PointF coord, int font_size, const Stroke& stroke, const Fill& fill, const Transform& transform);
 };
 
 #endif

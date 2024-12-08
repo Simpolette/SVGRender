@@ -5,9 +5,9 @@
 
 class PolyGon : public RawElement {
 private:
-    std::vector<Gdiplus::Point> points;
+    std::vector<Gdiplus::PointF> points;
 public:
-    std::vector<Gdiplus::Point> getPoints() const;
+    std::vector<Gdiplus::PointF> getPoints() const;
     ElementType getType() const;
     void print() const override;
     PolyGon(std::string points, const Stroke& stroke, const Fill& fill, const Transform& transform);

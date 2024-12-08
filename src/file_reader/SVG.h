@@ -40,7 +40,7 @@ private:
     RawElement* parseText(rapidxml::xml_node<> *node);
     RawElement* parseGroup(rapidxml::xml_node<> * node, rapidxml::xml_document<>& doc);
     RawElement* parsePath(rapidxml::xml_node<> *node);
-    std::vector<std::pair<char, Gdiplus::Point>> parsePathData(rapidxml::xml_attribute<> *attr);
+    std::vector<std::pair<char, Gdiplus::PointF>> parsePathData(rapidxml::xml_attribute<> *attr);
 
 public:
     std::vector<RawElement*> parseSVGFile(const std::string& filePath);
