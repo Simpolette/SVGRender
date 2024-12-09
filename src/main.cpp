@@ -14,7 +14,7 @@ float rotationAngle = 0.0f;
 
 std::vector<RawElement*> vec;
 
-VOID OnPaint(HDC hdc)
+VOID OnPaint(HDC hdc, std::string filePath)
 {
    // Ref: https://docs.microsoft.com/en-us/windows/desktop/gdiplus/-gdiplus-getting-started-use
    Graphics graphics(hdc);
@@ -29,7 +29,7 @@ VOID OnPaint(HDC hdc)
    float centerY = (clientRect.bottom - clientRect.top);
 
    GetSVG getSVG;
-   vec = getSVG.parseSVGFile("../assets/svg-12.svg");
+   vec = getSVG.parseSVGFile(filePath);
    int n = vec.size();
 
    double viewWidth = getSVG.getViewWidth();
@@ -118,21 +118,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
 {
    HDC          hdc;
    PAINTSTRUCT  ps;
+
+   std::string filePath = "";
    
+   if (__argc == 2){
+      filePath = __argv[1];
+   }
+   else{
+      std::cout << "File unknown!\n";
+   }
+
    switch(message)
    {
    case WM_PAINT:
       hdc = BeginPaint(hWnd, &ps);
-      OnPaint(hdc);
+      OnPaint(hdc, filePath);
       EndPaint(hWnd, &ps);
       return 0;
    case WM_MOUSEWHEEL: {
        int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
        if (zDelta > 0) {
-           scale *= 1.2f; // Zoom in
+           scale *= 2.5f; // Zoom in
        }
        else {
-           scale /= 1.2f; // Zoom out
+           scale /= 2.5f; // Zoom out
        }
        InvalidateRect(hWnd, NULL, TRUE);
        return 0;

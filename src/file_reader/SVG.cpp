@@ -15,6 +15,9 @@ Stroke GetSVG::parseStroke(rapidxml::xml_attribute<> *attr){
 
         if (attrName == "stroke") {
             color = attrValue;
+            for (int i = 0; i < color.size(); i++){
+                color[i] = std::tolower(color[i]);
+            }
             if (color.find("none") != std::string::npos){
                 opacity = 0;
                 color = "";
@@ -55,6 +58,9 @@ Fill GetSVG::parseFill(rapidxml::xml_attribute<> *attr){
 
         if (attrName == "fill"){
             color = attrValue;
+            for (int i = 0; i < color.size(); i++){
+                color[i] = std::tolower(color[i]);
+            }
             if (color.find("none") != std::string::npos){
                 opacity = 0;
                 color = "";
@@ -369,7 +375,7 @@ RawElement* GetSVG::parseGroup(rapidxml::xml_node<> *node, rapidxml::xml_documen
         for (int i = 0; i < inheritAttr.size(); i++){
             bool isExisted = false;
             for (rapidxml::xml_attribute<>* attr = child->first_attribute(); attr; attr = attr->next_attribute()){
-                if (inheritAttr[i].first == attr->value()){
+                if (inheritAttr[i].first == attr->name()){
                     isExisted = true;
                     break;
                 }

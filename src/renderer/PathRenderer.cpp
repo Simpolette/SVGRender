@@ -20,7 +20,6 @@ void PathRenderer::render(Gdiplus::Graphics& graphics) const {
 
         switch (command) {
         case 'M':  // MoveTo (di chuyển đến vị trí mới)
-            pathGraphics.CloseFigure();
             pathGraphics.StartFigure();  // Bắt đầu một hình vẽ mới
             currentPoint = point;  // Chuyển sang kiểu PointF
             break;
@@ -53,7 +52,6 @@ void PathRenderer::render(Gdiplus::Graphics& graphics) const {
 
             // Các lệnh chữ thường:
         case 'm':  // moveTo (di chuyển đến vị trí mới theo tọa độ tương đối)
-            pathGraphics.CloseFigure();
             pathGraphics.StartFigure();  // Bắt đầu một hình vẽ mới
             currentPoint.X += point.X;  // Di chuyển tương đối
             currentPoint.Y += point.Y;  // Di chuyển tương đối
