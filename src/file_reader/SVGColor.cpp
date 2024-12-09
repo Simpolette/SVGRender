@@ -33,7 +33,7 @@ SVGColor::SVGColor(const std::string& color){
 
     }
 
-    if (color.find("rgb")) {
+    if (color.find("rgb") != std::string::npos) {
         std::istringstream iss(color);
         std::string temp;
         getline(iss, temp, '(');
