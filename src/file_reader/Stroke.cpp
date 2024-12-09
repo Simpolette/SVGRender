@@ -23,6 +23,7 @@ Stroke::Stroke(std::string color, double width, double opacity, std::string line
     if (color != ""){
         this->opacity = 1;
     }
+    
 }
 
 Gdiplus::Color Stroke::getColorA() const {

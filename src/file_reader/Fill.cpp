@@ -21,6 +21,10 @@ double Fill::getOpacity() const {
     return opacity;
 }
 
+std::string Fill::getRule() const {
+    return rule;
+}
+
 void Fill::print() const{
     std::cout << "Fill:\n"; 
     std::cout << "Color: (" << (int)color.GetR() << ", " 

@@ -17,6 +17,7 @@ public:
     Fill(std::string color, double opacity, std::string rule);
     Gdiplus::Color getColorA() const;
     double getOpacity() const;
+    std::string getRule() const;
     void print() const;
 };
 

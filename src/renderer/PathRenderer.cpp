@@ -1,14 +1,16 @@
 ﻿#include "PathRenderer.h"
 
 PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Path& path)
-    : Renderer(fill, stroke, transform), path(path) {}
+: Renderer(fill, stroke, transform) {
 
-void PathRenderer::render(Gdiplus::Graphics& graphics) const {
-    Gdiplus::Matrix originalMatrix;
-    graphics.GetTransform(&originalMatrix);
-    graphics.MultiplyTransform(matrix);
+    std::string fillRule = fill.getRule();
+    if (fillRule == "evenodd"){
+        pathGraphics.SetFillMode(Gdiplus::FillModeAlternate);
+    }
+    else if (fillRule == "nonzero"){
+        pathGraphics.SetFillMode(Gdiplus::FillModeWinding);
+    }
 
-    Gdiplus::GraphicsPath pathGraphics;
     const std::vector<std::pair<char, Gdiplus::PointF>>& pathData = path.getPath();
 
     Gdiplus::PointF currentPoint(0, 0);  // Điểm hiện tại (bắt đầu từ 0, 0) kiểu PointF
@@ -91,6 +93,13 @@ void PathRenderer::render(Gdiplus::Graphics& graphics) const {
             break;
         }
     }
+
+}
+
+void PathRenderer::render(Gdiplus::Graphics& graphics) const {
+    Gdiplus::Matrix originalMatrix;
+    graphics.GetTransform(&originalMatrix);
+    graphics.MultiplyTransform(matrix);
 
     // Vẽ hình theo đường path đã tạo ra
     graphics.FillPath(brush, &pathGraphics);  // Tô màu path

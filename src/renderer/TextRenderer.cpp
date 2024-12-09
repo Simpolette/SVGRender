@@ -4,6 +4,11 @@ TextRenderer::TextRenderer(const Fill& fill, const Stroke& stroke, const Transfo
 : Renderer(fill, stroke, transform) {
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
     family = new Gdiplus::FontFamily(converter.from_bytes(text.getFontFamily()).c_str());
+    if (family->GetLastStatus() != Gdiplus::Ok){
+        delete family;
+        family = new Gdiplus::FontFamily(L"Times New Roman");
+    }
+
     double ascent = family->GetCellAscent(0);
     double emHeight = family->GetEmHeight(0);
     Gdiplus::PointF point = text.getPoint();

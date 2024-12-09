@@ -40,15 +40,24 @@ SVGColor::SVGColor(const std::string& color){
         return;
     }
     else if (color[0] == '#'){
-        std::string redTemp = color.substr(1, 2);
-        std::string greenTemp = color.substr(3, 2);
-        std::string blueTemp = color.substr(5, 2);
-
+        std::string redTemp;
+        std::string greenTemp;
+        std::string blueTemp;
+        if (color.size() == 7){
+            redTemp = color.substr(1, 2);
+            greenTemp = color.substr(3, 2);
+            blueTemp = color.substr(5, 2);
+        }
+        else if (color.size() == 4){
+            redTemp = color.substr(1, 1);
+            greenTemp = color.substr(2, 1);
+            blueTemp = color.substr(3, 1);
+        }
         r = getValue(redTemp);
         g = getValue(greenTemp);
         b = getValue(blueTemp);
-        
     }
+    
 }
 
 int SVGColor::getR() const{
