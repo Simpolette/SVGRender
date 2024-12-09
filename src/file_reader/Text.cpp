@@ -1,6 +1,6 @@
 #include "Text.h"
 
-Text::Text(std::string content, Gdiplus::Point coord, int font_size, const Stroke& stroke, const Fill& fill, const Transform& transform)
+Text::Text(std::string content, Gdiplus::PointF coord, int font_size, const Stroke& stroke, const Fill& fill, const Transform& transform)
 : RawElement(stroke, fill, transform) {
     this->content = content;
     this->coord = coord;
@@ -11,7 +11,7 @@ std::string Text::getContent() const {
     return content;
 }
 
-Gdiplus::Point Text::getPoint() const {
+Gdiplus::PointF Text::getPoint() const {
     return coord;
 }
 

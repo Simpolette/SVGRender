@@ -5,14 +5,14 @@
 
 class Circle : public RawElement {
 private:
-    Gdiplus::Point coord;
+    Gdiplus::PointF coord;
     int radius;
 public:
-    Gdiplus::Point getPoint() const;
+    Gdiplus::PointF getPoint() const;
     int getRadius() const;
     ElementType getType() const;
     void print() const override;
-    Circle(Gdiplus::Point coord, int radius, const Stroke& stroke, const Fill& fill, const Transform& transform);
+    Circle(Gdiplus::PointF coord, int radius, const Stroke& stroke, const Fill& fill, const Transform& transform);
 };
 
 #endif

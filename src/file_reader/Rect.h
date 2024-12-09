@@ -5,15 +5,15 @@
 
 class Rectan : public RawElement {
 private:
-    Gdiplus::Point coord;
+    Gdiplus::PointF coord;
     int width, height;
 public:
-    Gdiplus::Point getPoint() const;
+    Gdiplus::PointF getPoint() const;
     int getWidth() const;
     int getHeight() const;
     ElementType getType() const;
     void print() const override;
-    Rectan(Gdiplus::Point coord, int width, int height, const Stroke& stroke, const Fill& fill, const Transform& transform);
+    Rectan(Gdiplus::PointF coord, int width, int height, const Stroke& stroke, const Fill& fill, const Transform& transform);
 };
 
 #endif

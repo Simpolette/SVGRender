@@ -1,6 +1,6 @@
 #include "Path.h"
 
-Path::Path(const std::vector<std::pair<char, Gdiplus::Point>> &tab, const Stroke& stroke, const Fill& fill, const Transform& transform)
+Path::Path(const std::vector<std::pair<char, Gdiplus::PointF    >> &tab, const Stroke& stroke, const Fill& fill, const Transform& transform)
 :   RawElement(stroke, fill, transform) {
     this->table = tab;
 }
@@ -9,7 +9,7 @@ ElementType Path::getType() const {
     return ElementType::PATH;
 }
 
-std::vector<std::pair<char, Gdiplus::Point>> Path::getPath() const {
+std::vector<std::pair<char, Gdiplus::PointF >> Path::getPath() const {
     return table;
 }
 

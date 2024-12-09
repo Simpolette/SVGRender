@@ -7,12 +7,12 @@
 
 class Path : public RawElement {
 private:
-    std::vector<std::pair<char, Gdiplus::Point>> table;
+    std::vector<std::pair<char, Gdiplus::PointF>> table;
 public:
     ElementType getType() const;
-    std::vector<std::pair<char, Gdiplus::Point>> getPath() const;
+    std::vector<std::pair<char, Gdiplus::PointF>> getPath() const;
     void print() const override;
-    Path(const std::vector<std::pair<char, Gdiplus::Point>> &tab, const Stroke& stroke, const Fill& fill, const Transform& transform);
+    Path(const std::vector<std::pair<char, Gdiplus::PointF>> &tab, const Stroke& stroke, const Fill& fill, const Transform& transform);
 };
 
 #endif

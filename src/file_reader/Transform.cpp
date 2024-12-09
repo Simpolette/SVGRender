@@ -1,6 +1,6 @@
 #include "Transform.h"
 
-Transform::Transform(Gdiplus::Point translate, Gdiplus::Point scale, double rotate) {
+Transform::Transform(Gdiplus::PointF translate, Gdiplus::PointF scale, double rotate) {
     this->translate = translate;
     this->scale = scale;
     this->rotate = rotate;
@@ -8,15 +8,15 @@ Transform::Transform(Gdiplus::Point translate, Gdiplus::Point scale, double rota
 
 Transform::Transform() {
     this->rotate = 0;
-    this->translate = Gdiplus::Point(0, 0);
-    this->scale = Gdiplus::Point(0, 0);
+    this->translate = Gdiplus::PointF(0, 0);
+    this->scale = Gdiplus::PointF(0, 0);
 }
 
-Gdiplus::Point Transform::getTranslate() const {
+Gdiplus::PointF Transform::getTranslate() const {
     return this->translate;
 }
 
-Gdiplus::Point Transform::getScale() const {
+Gdiplus::PointF Transform::getScale() const {
     return this->scale;
 }
 

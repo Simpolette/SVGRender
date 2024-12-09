@@ -1,13 +1,13 @@
 #include "Rect.h"
 
-Rectan::Rectan(Gdiplus::Point coord, int width, int height, const Stroke& stroke, const Fill& fill, const Transform& transform) 
+Rectan::Rectan(Gdiplus::PointF coord, int width, int height, const Stroke& stroke, const Fill& fill, const Transform& transform) 
 : RawElement(stroke, fill, transform) {
     this->coord = coord;
     this->width = width;
     this->height = height;
 }
 
-Gdiplus::Point Rectan::getPoint() const{
+Gdiplus::PointF Rectan::getPoint() const{
     return coord;
 }
 

@@ -7,15 +7,15 @@
 
 class Transform{
 private:
-    Gdiplus::Point translate;
-    Gdiplus::Point scale;
+    Gdiplus::PointF translate;
+    Gdiplus::PointF scale;
     double rotate;
 public:
-    Gdiplus::Point getTranslate() const;
-    Gdiplus::Point getScale() const;
+    Gdiplus::PointF getTranslate() const;
+    Gdiplus::PointF getScale() const;
     double getRotate() const;
     Transform();
-    Transform(Gdiplus::Point translate, Gdiplus::Point scale, double rotate);
+    Transform(Gdiplus::PointF translate, Gdiplus::PointF scale, double rotate);
     void print() const;
 };
 

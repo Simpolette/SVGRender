@@ -2,9 +2,9 @@
 
 PolylineRenderer::PolylineRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const PolyLine& polyline)
 : Renderer(fill, stroke, transform) {
-    std::vector<Gdiplus::Point> pointsVec = polyline.getPoints();
+    std::vector<Gdiplus::PointF> pointsVec = polyline.getPoints();
     count = pointsVec.size();
-    points = new Gdiplus::Point[count];
+    points = new Gdiplus::PointF[count];
     for (int i = 0; i < count; i++){
         points[i] = pointsVec[i];
     }

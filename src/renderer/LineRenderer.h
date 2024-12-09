@@ -6,8 +6,8 @@
 class LineRenderer : public Renderer {
 
 private:
-    Gdiplus::Point startPoint;
-    Gdiplus::Point endPoint;
+    Gdiplus::PointF startPoint;
+    Gdiplus::PointF endPoint;
 
 public:
     LineRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Line& line);

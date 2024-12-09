@@ -7,13 +7,13 @@ PolyGon::PolyGon(std::string points, const Stroke& stroke, const Fill& fill, con
         double x, y;
         while (iss >> x){
             iss >> y;
-            Gdiplus::Point coord(x, y);
+            Gdiplus::PointF coord(x, y);
             this->points.push_back(coord);
         }
     }
 }
 
-std::vector<Gdiplus::Point> PolyGon::getPoints() const {
+std::vector<Gdiplus::PointF> PolyGon::getPoints() const {
     return points;
 }
 
