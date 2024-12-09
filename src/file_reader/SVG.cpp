@@ -7,6 +7,7 @@ Stroke GetSVG::parseStroke(rapidxml::xml_attribute<> *attr){
     std::string linecap = "butt";
     std::vector<double> dasharray;
     std::string linejoin = "miter";
+    double miterlimit = 4;
     
     for (;attr ;attr = attr->next_attribute()){
         std::string attrName = attr->name();
@@ -21,10 +22,13 @@ Stroke GetSVG::parseStroke(rapidxml::xml_attribute<> *attr){
             }
         }
         else if (attrName == "stroke-width"){
-            width = stoi(attrValue);
+            width = stod(attrValue);
         }
         else if (attrName == "stroke-opacity"){
             opacity = stod(attrValue);
+        }
+        else if (attrName == "stroke-miterlimit"){
+            miterlimit = stod(attrValue);
         }
         else if (attrName == "stroke-linecap"){
             linecap = attrValue;
@@ -37,7 +41,7 @@ Stroke GetSVG::parseStroke(rapidxml::xml_attribute<> *attr){
         }
     }
 
-    return Stroke(color, width, opacity, linecap, dasharray, linejoin);
+    return Stroke(color, width, opacity, linecap, dasharray, linejoin, miterlimit);
 }
 
 Fill GetSVG::parseFill(rapidxml::xml_attribute<> *attr){
@@ -137,8 +141,7 @@ Transform GetSVG::parseTransform(const std::string& transformVal){
 }
 
 RawElement* GetSVG::parseRect(rapidxml::xml_node<> *node){
-    int width = 0, height = 0;
-    double x = 0, y = 0;
+    double x = 0, y = 0, width = 0, height = 0;
     Stroke stroke = parseStroke(node->first_attribute());
     Fill fill = parseFill(node->first_attribute());
     Transform transform;
@@ -157,18 +160,17 @@ RawElement* GetSVG::parseRect(rapidxml::xml_node<> *node){
             y = stod(attrValue);
         }
         else if (attrName == "width"){
-            width = stoi(attrValue);
+            width = stod(attrValue);
         }
         else if (attrName == "height"){
-            height = stoi(attrValue);
+            height = stod(attrValue);
         }
     }
     return new Rectan(Gdiplus::PointF(x, y), width, height, stroke, fill, transform);
 }
 
 RawElement* GetSVG::parseCircle(rapidxml::xml_node<> *node){
-    int radius = 0;
-    double x = 0, y = 0;
+    double x = 0, y = 0, radius = 0;
     Stroke stroke = parseStroke(node->first_attribute());
     Fill fill = parseFill(node->first_attribute());
     Transform transform;
@@ -187,15 +189,14 @@ RawElement* GetSVG::parseCircle(rapidxml::xml_node<> *node){
             y = stod(attrValue);
         }
         else if (attrName == "r"){
-            radius = stoi(attrValue);
+            radius = stod(attrValue);
         }
     }
     return new Circle(Gdiplus::PointF(x, y), radius, stroke, fill, transform);
 }
 
 RawElement* GetSVG::parseEllipse(rapidxml::xml_node<> *node){
-    int rx = 0, ry = 0;
-    double x = 0, y = 0;
+    double x = 0, y = 0, rx = 0, ry = 0;
     Stroke stroke = parseStroke(node->first_attribute());
     Fill fill = parseFill(node->first_attribute());
     Transform transform;
@@ -214,10 +215,10 @@ RawElement* GetSVG::parseEllipse(rapidxml::xml_node<> *node){
             y = stod(attrValue);
         }
         else if (attrName == "rx"){
-            rx = stoi(attrValue);
+            rx = stod(attrValue);
         }
         else if (attrName == "ry"){
-            ry = stoi(attrValue);
+            ry = stod(attrValue);
         }
     }
 
@@ -303,8 +304,11 @@ RawElement* GetSVG::parseLine(rapidxml::xml_node<> *node){
 
 RawElement* GetSVG::parseText(rapidxml::xml_node<> *node){
     std::string content = node->value();
-    int font_size = 16;
+    double font_size = 16;
     double x = 0, y = 0;
+    std::string font_family = "Times New Roman";
+    std::string font_style = "normal";
+    std::string text_anchor = "start";
     Stroke stroke = parseStroke(node->first_attribute());
     Fill fill = parseFill(node->first_attribute());
     Transform transform;
@@ -323,11 +327,20 @@ RawElement* GetSVG::parseText(rapidxml::xml_node<> *node){
             y = stod(attrValue);
         }
         else if (attrName == "font-size"){
-            font_size = stoi(attrValue);
+            font_size = stod(attrValue);
+        }
+        else if (attrName == "font-family"){
+            font_family = attrValue;
+        }
+        else if (attrName == "font-style"){
+            font_style = attrValue;
+        }
+        else if (attrName == "text-anchor"){
+            text_anchor = attrValue;
         }
     }
 
-    return new Text(content, Gdiplus::PointF(x, y), font_size, stroke, fill, transform);
+    return new Text(content, Gdiplus::PointF(x, y), font_size, font_family, font_style, text_anchor, stroke, fill, transform);
 }
 
 RawElement* GetSVG::parseGroup(rapidxml::xml_node<> *node, rapidxml::xml_document<>& doc) {
@@ -561,6 +574,43 @@ std::vector<RawElement*> GetSVG::parseSVGFile(const std::string& filePath){
     doc.parse<0>(xml);
 
     rapidxml::xml_node<> *root = doc.first_node("svg");
+
+    viewWidth = 0;
+    viewHeight = 0;
+    boxOrigin = Gdiplus::PointF(0, 0);
+    boxWidth = 0;
+    boxHeight = 0;
+
+    for (rapidxml::xml_attribute<>* attr = root->first_attribute(); attr; attr = attr->next_attribute()){
+        std::string attrName = attr->name();
+        std::string attrValue = attr->value();
+        if (attrName == "width"){
+            if (attrValue.find("pt") != std::string::npos){
+                size_t idx = 0;
+                viewWidth = stod(attrValue, &idx) * 4 / 3;
+            }
+            else{
+                viewWidth = stod(attrValue);
+            }
+        }
+        else if (attrName == "height"){
+            if (attrValue.find("pt") != std::string::npos){
+                size_t idx = 0;
+                viewHeight = stod(attrValue, &idx) * 4 / 3;
+            }
+            else{
+                viewHeight = stod(attrValue);
+            }
+        }
+        else if (attrName == "viewBox"){
+            std::stringstream ss(attrValue);
+            double x, y;
+            ss >> x >> y >> boxWidth >> boxHeight;
+            boxOrigin = Gdiplus::PointF(x, y);
+        }
+
+    }
+
     if (root){
         for (rapidxml::xml_node<> *child = root->first_node(); child; child = child->next_sibling()) {
             std::string shapeName = child->name();
@@ -605,4 +655,24 @@ std::vector<RawElement*> GetSVG::parseSVGFile(const std::string& filePath){
 
     delete[] xml;
     return vec;
+}
+
+double GetSVG::getViewWidth() const{
+    return viewWidth;
+}
+
+double GetSVG::getViewHeight() const{
+    return viewHeight;
+}
+
+Gdiplus::PointF GetSVG::getBoxOrigin() const{
+    return boxOrigin;
+}
+
+double GetSVG::getBoxWidth() const{
+    return boxWidth;
+}
+
+double GetSVG::getBoxHeight() const{
+    return boxHeight;
 }

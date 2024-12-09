@@ -11,17 +11,19 @@
 class Stroke{
 private:
     Gdiplus::Color color;
-    int width;
+    double width;
     double opacity;
     std::string linecap;
     std::vector<double> dasharray;
     std::string linejoin;
+    double miterlimit;
 public:
     Stroke();
-    Stroke(std::string color, int width, double opacity, std::string linecap, std::vector<double> dasharray, std::string linejoin);
+    Stroke(std::string color, double width, double opacity, std::string linecap, std::vector<double> dasharray, std::string linejoin, double stroke_miterlimit);
     Gdiplus::Color getColorA() const;
     double getOpacity() const;
-    int getWidth() const;
+    double getWidth() const;
+    double getMiterLimit() const;
     void print() const;
 };
 

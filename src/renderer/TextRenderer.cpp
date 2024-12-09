@@ -3,17 +3,17 @@
 TextRenderer::TextRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Text& text) 
 : Renderer(fill, stroke, transform) {
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    Gdiplus::FontFamily family(L"Times New Roman");
-    int ascent = family.GetCellAscent(0);
-    int emHeight = family.GetEmHeight(0);
+    family = new Gdiplus::FontFamily(converter.from_bytes(text.getFontFamily()).c_str());
+    double ascent = family->GetCellAscent(0);
+    double emHeight = family->GetEmHeight(0);
     Gdiplus::PointF point = text.getPoint();
 
     content = converter.from_bytes(text.getContent());
     length = content.size();
     style = 0;
     emSize = (float)text.getFontSize();
-    int ascentOffset = floor(emSize * (static_cast<Gdiplus::REAL>(ascent) / emHeight));
-    int topLeftY = point.Y - ascentOffset;
+    double ascentOffset = emSize * (static_cast<Gdiplus::REAL>(ascent) / emHeight);
+    double topLeftY = point.Y - ascentOffset;
 
     origin = Gdiplus::PointF(point.X, topLeftY);
     format.SetAlignment(Gdiplus::StringAlignmentNear);
@@ -27,11 +27,14 @@ void TextRenderer::render(Gdiplus::Graphics& graphics) const{
     
     Gdiplus::GraphicsPath text;
     text.StartFigure();
-    Gdiplus::FontFamily family(L"Times New Roman");
-    text.AddString(content.c_str(), length, &family, style, emSize, origin, &format);
+    text.AddString(content.c_str(), length, family, style, emSize, origin, &format);
 
     graphics.FillPath(brush, &text);
     graphics.DrawPath(pen, &text);
 
     graphics.SetTransform(&originalMatrix);
+}
+
+TextRenderer::~TextRenderer(){
+    delete family;
 }

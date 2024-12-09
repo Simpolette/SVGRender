@@ -6,16 +6,29 @@ int SVGColor::getValue(const std::string& s) const {
     return std::stoi(s, NULL, 16);
 }
 
+std::string SVGColor::getLower(const std::string &color) const {
+    int n = color.size();
+    std::string res;
+    for (int i = 0; i < n; i++) {
+        if (color[i] >= 'A' && color[i] <= 'Z') {
+            res += char(color[i] + 32);
+        }
+        else {
+            res += char(color[i]);
+        }
+    }
+}
+
 SVGColor::SVGColor(const std::string& color){
     if (color == ""){
         r = g = b = 0;
         return;
     }
-
-    if (mpColorName.find(color) != mpColorName.end()) {
-        r = mpColorName[color].GetRed();
-        g = mpColorName[color].GetGreen();
-        b = mpColorName[color].GetBlue();
+    std::string temp = getLower(color);
+    if (mpColorName.find(temp) != mpColorName.end()) {
+        r = mpColorName[temp].GetRed();
+        g = mpColorName[temp].GetGreen();
+        b = mpColorName[temp].GetBlue();
         return;
 
     }
@@ -30,6 +43,19 @@ SVGColor::SVGColor(const std::string& color){
         g = stoi(temp);
         getline(iss, temp, ')');
         b = stoi(temp);
+        return;
+    }
+
+    if (color == "#FFF") {
+        r = 255;
+        g = 255;
+        b = 255;
+        return;
+    }
+    if (color == "#000") {
+        r = 0;
+        g = 0;
+        b = 0;
         return;
     }
 

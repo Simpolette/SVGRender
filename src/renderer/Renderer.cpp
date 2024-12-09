@@ -17,6 +17,9 @@ Gdiplus::Pen* Renderer::getPen(const Stroke& stroke) {
 
     Gdiplus::Pen* pen = new Gdiplus::Pen(penColor, static_cast<Gdiplus::REAL>(stroke.getWidth()));
     
+    pen->SetLineJoin(Gdiplus::LineJoinMiter);
+    pen->SetMiterLimit(stroke.getMiterLimit());
+
     return pen;
 }
 

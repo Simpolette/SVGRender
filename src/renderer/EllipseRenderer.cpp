@@ -3,8 +3,8 @@
 EllipseRenderer::EllipseRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Ellip& ellipse)
 : Renderer(fill, stroke, transform) {
     Gdiplus::PointF coord = ellipse.getPoint();
-    int rx = ellipse.getRX();
-    int ry = ellipse.getRY();
+    double rx = ellipse.getRX();
+    double ry = ellipse.getRY();
 
     x = coord.X - rx;
     y = coord.Y - ry;
