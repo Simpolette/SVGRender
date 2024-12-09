@@ -40,8 +40,8 @@ Gdiplus::Brush* Renderer::getBrush(const Fill& fill) {
 Gdiplus::Matrix* Renderer::getMatrix(const Transform& transform){
     Gdiplus::Matrix* matrix = new Gdiplus::Matrix;
     matrix->Translate(transform.getTranslate().X, transform.getTranslate().Y);
-    matrix->Rotate(transform.getRotate());
     matrix->Scale(transform.getScale().X, transform.getScale().Y);
+    matrix->Rotate(transform.getRotate());
 
     return matrix;
 }

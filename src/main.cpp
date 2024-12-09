@@ -37,10 +37,8 @@ VOID OnPaint(HDC hdc, std::string filePath)
    Gdiplus::PointF boxOrigin = getSVG.getBoxOrigin();
    double boxWidth = getSVG.getBoxWidth();
    double boxHeight = getSVG.getBoxHeight();
-
       // Áp dụng các phép biến đổi
    matrix.Translate(-centerX, -centerY);  // Dịch về gốc tọa độ
-   // graphics.TranslateTransform(-boxOrigin.X, -boxOrigin.Y);
 
    matrix.Rotate(rotationAngle);         // Xoay quanh gốc
    matrix.Translate(centerX, centerY);   // Dịch về vị trí ban đầu
@@ -49,7 +47,7 @@ VOID OnPaint(HDC hdc, std::string filePath)
 
 
    for (int i = 0; i < n; i++){
-      vec[i]->print();
+      // vec[i]->print();
       Renderer* render = RendererFactory::createRenderer(vec[i]);
       render->render(graphics);
       
@@ -138,10 +136,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
    case WM_MOUSEWHEEL: {
        int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
        if (zDelta > 0) {
-           scale *= 2.5f; // Zoom in
+           scale *= 1.1f; // Zoom in
        }
        else {
-           scale /= 2.5f; // Zoom out
+           scale /= 1.1f; // Zoom out
        }
        InvalidateRect(hWnd, NULL, TRUE);
        return 0;
