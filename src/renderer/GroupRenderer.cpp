@@ -5,7 +5,6 @@ GroupRenderer::GroupRenderer(const Fill& fill, const Stroke& stroke, const Trans
 : Renderer(fill, stroke, transform){
 	const std::vector<RawElement*>& vec = group.getRawElement();
 	for (int i = 0; i < vec.size(); i++) {
-        vec[i]->setTransform(transform);
 		Renderer* render = RendererFactory::createRenderer(vec[i]);
 		if (render) {
 			re.push_back(render); // Thêm Renderer tương ứng vào danh sách

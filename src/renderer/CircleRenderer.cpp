@@ -3,7 +3,7 @@
 CircleRenderer::CircleRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Circle& circle)
 : Renderer(fill, stroke, transform) {
     Gdiplus::PointF coord = circle.getPoint();
-    int r = circle.getRadius();
+    double r = circle.getRadius();
 
     x = coord.X - r;
     y = coord.Y - r;

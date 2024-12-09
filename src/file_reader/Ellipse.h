@@ -6,14 +6,14 @@
 class Ellip : public RawElement {
 private:
     Gdiplus::PointF coord;
-    int rx, ry;
+    double rx, ry;
 public:
     Gdiplus::PointF getPoint() const;
-    int getRX() const;
-    int getRY() const;
+    double getRX() const;
+    double getRY() const;
     ElementType getType() const;
     void print() const override;
-    Ellip(Gdiplus::PointF coord, int rx, int ry, const Stroke& stroke, const Fill& fill, const Transform& transform); 
+    Ellip(Gdiplus::PointF coord, double rx, double ry, const Stroke& stroke, const Fill& fill, const Transform& transform); 
 };
 
 

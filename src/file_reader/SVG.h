@@ -23,6 +23,14 @@
 #include "xml/rapidxml_utils.hpp"
 
 class GetSVG {
+
+private:
+    double viewWidth;
+    double viewHeight;
+    Gdiplus::PointF boxOrigin;
+    double boxWidth;
+    double boxHeight;
+
 private:
     bool checkAlpha(char ch);
     bool checkNumber(char ch);
@@ -44,6 +52,11 @@ private:
 
 public:
     std::vector<RawElement*> parseSVGFile(const std::string& filePath);
+    double getViewWidth() const;
+    double getViewHeight() const;
+    Gdiplus::PointF getBoxOrigin() const;
+    double getBoxWidth() const;
+    double getBoxHeight() const;
 };
 
 #endif

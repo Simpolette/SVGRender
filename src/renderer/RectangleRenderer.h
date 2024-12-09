@@ -6,10 +6,10 @@
 class RectangleRenderer : public Renderer {
 
 private:
-    int x;
-    int y;
-    int width;
-    int height;
+    Gdiplus::REAL x;
+    Gdiplus::REAL y;
+    Gdiplus::REAL width;
+    Gdiplus::REAL height;
 
 public:
     RectangleRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Rectan& rect);

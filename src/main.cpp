@@ -12,6 +12,8 @@ using namespace Gdiplus;
 float scale = 1.0f;
 float rotationAngle = 0.0f;
 
+std::vector<RawElement*> vec;
+
 VOID OnPaint(HDC hdc)
 {
    // Ref: https://docs.microsoft.com/en-us/windows/desktop/gdiplus/-gdiplus-getting-started-use
@@ -23,25 +25,31 @@ VOID OnPaint(HDC hdc)
 
    RECT clientRect;
    GetClientRect(WindowFromDC(hdc), &clientRect);
-   float centerX = (clientRect.right - clientRect.left) / 2.0f;
-   float centerY = (clientRect.bottom - clientRect.top) / 2.0f;
+   float centerX = (clientRect.right - clientRect.left);
+   float centerY = (clientRect.bottom - clientRect.top);
 
-   // Áp dụng các phép biến đổi
+   GetSVG getSVG;
+   vec = getSVG.parseSVGFile("../assets/svg-12.svg");
+   int n = vec.size();
+
+   double viewWidth = getSVG.getViewWidth();
+   double viewHeight = getSVG.getViewHeight();
+   Gdiplus::PointF boxOrigin = getSVG.getBoxOrigin();
+   double boxWidth = getSVG.getBoxWidth();
+   double boxHeight = getSVG.getBoxHeight();
+
+      // Áp dụng các phép biến đổi
    matrix.Translate(-centerX, -centerY);  // Dịch về gốc tọa độ
+   // graphics.TranslateTransform(-boxOrigin.X, -boxOrigin.Y);
+
    matrix.Rotate(rotationAngle);         // Xoay quanh gốc
    matrix.Translate(centerX, centerY);   // Dịch về vị trí ban đầu
    matrix.Scale(scale, scale);           // Áp dụng zoom
-
    graphics.SetTransform(&matrix);
 
 
-
-   GetSVG getSVG;
-   std::vector<RawElement*> vec = getSVG.parseSVGFile("../assets/svg-18.svg");
-   int n = vec.size();
-
    for (int i = 0; i < n; i++){
-      vec[i]->print();
+      // vec[i]->print();
       Renderer* render = RendererFactory::createRenderer(vec[i]);
       render->render(graphics);
       
@@ -121,10 +129,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
    case WM_MOUSEWHEEL: {
        int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
        if (zDelta > 0) {
-           scale *= 1.1f; // Zoom in
+           scale *= 1.2f; // Zoom in
        }
        else {
-           scale /= 1.1f; // Zoom out
+           scale /= 1.2f; // Zoom out
        }
        InvalidateRect(hWnd, NULL, TRUE);
        return 0;

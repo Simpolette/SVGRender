@@ -6,13 +6,13 @@
 class Circle : public RawElement {
 private:
     Gdiplus::PointF coord;
-    int radius;
+    double radius;
 public:
     Gdiplus::PointF getPoint() const;
-    int getRadius() const;
+    double getRadius() const;
     ElementType getType() const;
     void print() const override;
-    Circle(Gdiplus::PointF coord, int radius, const Stroke& stroke, const Fill& fill, const Transform& transform);
+    Circle(Gdiplus::PointF coord, double radius, const Stroke& stroke, const Fill& fill, const Transform& transform);
 };
 
 #endif
