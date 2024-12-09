@@ -59,9 +59,9 @@ SVGColor::SVGColor(const std::string& color){
         return;
     }
 
-    std::string redTemp = color.substr(0, 2);
-    std::string greenTemp = color.substr(2, 2);
-    std::string blueTemp = color.substr(4, 2);
+    std::string redTemp = color.substr(1, 2);
+    std::string greenTemp = color.substr(3, 2);
+    std::string blueTemp = color.substr(5, 2);
 
     r = getValue(redTemp);
     g = getValue(greenTemp);
