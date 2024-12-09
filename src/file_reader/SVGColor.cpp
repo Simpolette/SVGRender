@@ -50,8 +50,11 @@ SVGColor::SVGColor(const std::string& color){
         }
         else if (color.size() == 4){
             redTemp = color.substr(1, 1);
+            redTemp += redTemp;
             greenTemp = color.substr(2, 1);
+            greenTemp += greenTemp;
             blueTemp = color.substr(3, 1);
+            blueTemp += blueTemp;
         }
         r = getValue(redTemp);
         g = getValue(greenTemp);
