@@ -474,7 +474,7 @@ std::vector<std::pair<char, Gdiplus::PointF>> GetSVG::parsePathData(rapidxml::xm
     while (ss >> val){
         if (checkAlpha(val[0])){
             curCommand = val[0];
-            if (curCommand == 'M' || curCommand == 'm' || curCommand == 'L' || curCommand == 'l'){
+            if (curCommand == 'M' || curCommand == 'm' || curCommand == 'L' || curCommand == 'l' || curCommand == 'T' || curCommand == 't'){
                 double x, y;
                 ss >> x >> y;
                 pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(x, y)));
@@ -486,7 +486,7 @@ std::vector<std::pair<char, Gdiplus::PointF>> GetSVG::parsePathData(rapidxml::xm
                     pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(x, y)));
                 }
             }
-            else if (curCommand == 'H' || curCommand == 'h' || curCommand == 'V' || curCommand == 'v') {
+            else if (curCommand == 'H' || curCommand == 'h' || curCommand == 'V' || curCommand == 'v'){
                 double stat;
                 ss >> stat;
                 if (curCommand == 'H' || curCommand == 'h') {
@@ -496,12 +496,32 @@ std::vector<std::pair<char, Gdiplus::PointF>> GetSVG::parsePathData(rapidxml::xm
                     pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(0, stat)));
                 }
             }
-            else if (curCommand == 'Z' || curCommand == 'z') {
+            else if (curCommand == 'S' || curCommand == 's' || curCommand == 'Q' || curCommand == 'q'){
+                double x, y;
+                for (int i = 0; i < 2; i++){
+                    ss >> x >> y;
+                    pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(x, y)));
+                }
+            }
+            else if (curCommand == 'A' || curCommand == 'a'){
+                double x, y;
+                for (int i = 0; i < 4; i++){
+                    if (i != 1){
+                        ss >> x >> y;
+                    }
+                    else{
+                        ss >> x;
+                        y = 0;
+                    }
+                    pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(x, y)));
+                }
+            }
+            else if (curCommand == 'Z' || curCommand == 'z'){
                 pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(0, 0)));
             }
         }
         else{
-            if (curCommand == 'M' || curCommand == 'm' || curCommand == 'L' || curCommand == 'l'){
+            if (curCommand == 'M' || curCommand == 'm' || curCommand == 'L' || curCommand == 'l' || curCommand == 'T' || curCommand == 't'){
                 if (curCommand == 'M' || curCommand == 'm'){
                     curCommand--;
                 }
@@ -523,6 +543,19 @@ std::vector<std::pair<char, Gdiplus::PointF>> GetSVG::parsePathData(rapidxml::xm
                     pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(x, y)));
                 }
             }
+            else if (curCommand == 'S' || curCommand == 's' || curCommand == 'Q' || curCommand == 'q'){
+                double x, y;
+                for (int i = 0; i < 2; i++){
+                    if (i != 0){
+                        ss >> x >> y;
+                    }
+                    else{
+                        x = stod(val);
+                        ss >> y;
+                    }
+                    pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(x, y)));
+                }
+            }
             else if (curCommand == 'H' || curCommand == 'h' || curCommand == 'V' || curCommand == 'v') {
                 double stat;
                 stat = stod(val);
@@ -532,6 +565,20 @@ std::vector<std::pair<char, Gdiplus::PointF>> GetSVG::parsePathData(rapidxml::xm
                 else {
                     pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(0, stat)));
                 }
+            }
+            else if (curCommand == 'A' || curCommand == 'a'){
+                double x, y;
+                x = stod(val);
+                ss >> y;
+                pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(x, y)));
+                double xAxisRotation;
+                ss >> xAxisRotation;
+                pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(xAxisRotation, 0)));
+                double largeArc, sweep;
+                ss >> largeArc >> sweep;
+                pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(largeArc, sweep)));
+                ss >> x >> y;
+                pathData.push_back(std::make_pair(curCommand, Gdiplus::PointF(x, y)));
             }
         }
     }

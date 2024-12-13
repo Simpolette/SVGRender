@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400">
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000">
   <!-- Bầu trời -->
   <path d="M0,0H800V400H0Z" fill="rgb(135,206,235)"/>
   
@@ -28,7 +28,7 @@
   </g>
 
   <!-- Cây -->
-  <g transform="translate(50,-30)scale(1,1)">
+  <g transform="translate(50,-30)scale(1,2)scale(2)">
     <!-- Thân cây -->
     <rect x="500" y="250" width="30" height="100" fill="rgb(139,69,19)"/>
     <!-- Tán cây -->
