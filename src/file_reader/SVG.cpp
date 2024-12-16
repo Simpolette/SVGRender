@@ -80,7 +80,7 @@ Fill GetSVG::parseFill(rapidxml::xml_attribute<> *attr, std::vector<Gradient*> g
     }
 
     int n = gradients.size();
-    Gradient* temp;
+    Gradient* temp = NULL;
     for (int i = 0; i < n; i++) {
         std::string idGradient = gradients[i]->getID();
 
