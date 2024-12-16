@@ -47,10 +47,11 @@ Stroke GetSVG::parseStroke(rapidxml::xml_attribute<> *attr){
     return Stroke(color, width, opacity, linecap, dasharray, linejoin, miterlimit);
 }
 
-Fill GetSVG::parseFill(rapidxml::xml_attribute<> *attr){
+Fill GetSVG::parseFill(rapidxml::xml_attribute<> *attr, std::vector<Gradient*> gradients){
     std::string color = "";
     double opacity = 1;
     std::string rule = "nonezero";
+    std::string id;
     
     for (;attr ;attr = attr->next_attribute()){
         std::string attrName = attr->name();
@@ -73,9 +74,23 @@ Fill GetSVG::parseFill(rapidxml::xml_attribute<> *attr){
         else if (attrName == "fill-rule"){
             rule = attrValue;
         }
+        else if (attrName == "id") {
+            id = attrValue;
+        }
     }
 
-    return Fill(color, opacity, rule);
+    int n = gradients.size();
+    Gradient* temp;
+    for (int i = 0; i < n; i++) {
+        std::string idGradient = gradients[i]->getID();
+
+        if (idGradient.find(id) != std::string::npos) {
+            temp = gradients[i];
+            break;
+        }
+    }
+
+    return Fill(color, opacity, rule, temp);
 }
 
 bool GetSVG::checkNumber(char ch){
@@ -146,10 +161,10 @@ Transform GetSVG::parseTransform(const std::string& transformVal){
     return Transform(translate, scale, rotate);
 }
 
-RawElement* GetSVG::parseRect(rapidxml::xml_node<> *node){
+RawElement* GetSVG::parseRect(rapidxml::xml_node<> *node, std::vector<Gradient*> gradients){
     double x = 0, y = 0, width = 0, height = 0;
     Stroke stroke = parseStroke(node->first_attribute());
-    Fill fill = parseFill(node->first_attribute());
+    Fill fill = parseFill(node->first_attribute(), gradients);
     Transform transform;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
@@ -175,10 +190,10 @@ RawElement* GetSVG::parseRect(rapidxml::xml_node<> *node){
     return new Rectan(Gdiplus::PointF(x, y), width, height, stroke, fill, transform);
 }
 
-RawElement* GetSVG::parseCircle(rapidxml::xml_node<> *node){
+RawElement* GetSVG::parseCircle(rapidxml::xml_node<> *node, std::vector<Gradient*> gradients){
     double x = 0, y = 0, radius = 0;
     Stroke stroke = parseStroke(node->first_attribute());
-    Fill fill = parseFill(node->first_attribute());
+    Fill fill = parseFill(node->first_attribute(), gradients);
     Transform transform;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
@@ -201,10 +216,10 @@ RawElement* GetSVG::parseCircle(rapidxml::xml_node<> *node){
     return new Circle(Gdiplus::PointF(x, y), radius, stroke, fill, transform);
 }
 
-RawElement* GetSVG::parseEllipse(rapidxml::xml_node<> *node){
+RawElement* GetSVG::parseEllipse(rapidxml::xml_node<> *node, std::vector<Gradient*> gradients){
     double x = 0, y = 0, rx = 0, ry = 0;
     Stroke stroke = parseStroke(node->first_attribute());
-    Fill fill = parseFill(node->first_attribute());
+    Fill fill = parseFill(node->first_attribute(), gradients);
     Transform transform;
     
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
@@ -231,11 +246,11 @@ RawElement* GetSVG::parseEllipse(rapidxml::xml_node<> *node){
     return new Ellip(Gdiplus::PointF(x, y), rx, ry, stroke, fill, transform);
 }
 
-RawElement* GetSVG::parsePolygon(rapidxml::xml_node<> *node){
+RawElement* GetSVG::parsePolygon(rapidxml::xml_node<> *node, std::vector<Gradient*> gradients){
     std::string points = "";
 
     Stroke stroke = parseStroke(node->first_attribute());
-    Fill fill = parseFill(node->first_attribute());
+    Fill fill = parseFill(node->first_attribute(), gradients);
     Transform transform;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
@@ -254,11 +269,11 @@ RawElement* GetSVG::parsePolygon(rapidxml::xml_node<> *node){
     return new PolyGon(points, stroke, fill, transform);
 }
 
-RawElement* GetSVG::parsePolyline(rapidxml::xml_node<> *node){
+RawElement* GetSVG::parsePolyline(rapidxml::xml_node<> *node, std::vector<Gradient*> gradients){
     std::string points = "";
 
     Stroke stroke = parseStroke(node->first_attribute());
-    Fill fill = parseFill(node->first_attribute());
+    Fill fill = parseFill(node->first_attribute(), gradients);
     Transform transform;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
@@ -277,11 +292,11 @@ RawElement* GetSVG::parsePolyline(rapidxml::xml_node<> *node){
     return new PolyLine(points, stroke, fill, transform);
 }
 
-RawElement* GetSVG::parseLine(rapidxml::xml_node<> *node){
+RawElement* GetSVG::parseLine(rapidxml::xml_node<> *node, std::vector<Gradient*> gradients){
     double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
 
     Stroke stroke = parseStroke(node->first_attribute());
-    Fill fill = parseFill(node->first_attribute());
+    Fill fill = parseFill(node->first_attribute(), gradients);
     Transform transform;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
@@ -308,7 +323,7 @@ RawElement* GetSVG::parseLine(rapidxml::xml_node<> *node){
     return new Line(Gdiplus::PointF(x1, y1), Gdiplus::PointF(x2, y2), stroke, fill, transform);
 }
 
-RawElement* GetSVG::parseText(rapidxml::xml_node<> *node){
+RawElement* GetSVG::parseText(rapidxml::xml_node<> *node, std::vector<Gradient*> gradients){
     std::string content = node->value();
     double font_size = 16;
     double x = 0, y = 0;
@@ -316,7 +331,7 @@ RawElement* GetSVG::parseText(rapidxml::xml_node<> *node){
     std::string font_style = "normal";
     std::string text_anchor = "start";
     Stroke stroke = parseStroke(node->first_attribute());
-    Fill fill = parseFill(node->first_attribute());
+    Fill fill = parseFill(node->first_attribute(), gradients);
     Transform transform;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
@@ -349,9 +364,9 @@ RawElement* GetSVG::parseText(rapidxml::xml_node<> *node){
     return new Text(content, Gdiplus::PointF(x, y), font_size, font_family, font_style, text_anchor, stroke, fill, transform);
 }
 
-RawElement* GetSVG::parseGroup(rapidxml::xml_node<> *node, rapidxml::xml_document<>& doc) {
+RawElement* GetSVG::parseGroup(rapidxml::xml_node<> *node, rapidxml::xml_document<>& doc, std::vector<Gradient*> gradients) {
     Stroke stroke = parseStroke(node->first_attribute());
-    Fill fill = parseFill(node->first_attribute());
+    Fill fill = parseFill(node->first_attribute(), gradients);
     Transform transform;
 
     std::vector<RawElement*> vec;
@@ -389,39 +404,39 @@ RawElement* GetSVG::parseGroup(rapidxml::xml_node<> *node, rapidxml::xml_documen
         }
 
         if (shapeName == "rect"){
-            RawElement* rect = this->parseRect(child);
+            RawElement* rect = this->parseRect(child, gradients);
             vec.push_back(rect);
         }
         else if (shapeName == "circle"){
-            RawElement* circle = this->parseCircle(child);
+            RawElement* circle = this->parseCircle(child, gradients);
             vec.push_back(circle);
         }
         else if (shapeName == "ellipse"){
-            RawElement* ellip = this->parseEllipse(child);
+            RawElement* ellip = this->parseEllipse(child, gradients);
             vec.push_back(ellip);
         }
         else if (shapeName == "polygon"){
-            RawElement* polygon = this->parsePolygon(child);
+            RawElement* polygon = this->parsePolygon(child, gradients);
             vec.push_back(polygon);
         }
         else if (shapeName == "polyline"){
-            RawElement* polyline = this->parsePolyline(child);
+            RawElement* polyline = this->parsePolyline(child, gradients);
             vec.push_back(polyline);
         }
         else if (shapeName == "line"){
-            RawElement* line = this->parseLine(child);
+            RawElement* line = this->parseLine(child, gradients);
             vec.push_back(line);
         }
         else if (shapeName == "g") {
-            RawElement* group = this->parseGroup(child, doc);
+            RawElement* group = this->parseGroup(child, doc, gradients);
             vec.push_back(group);
         }
         else if (shapeName == "path") {
-            RawElement* path = this->parsePath(child);
+            RawElement* path = this->parsePath(child, gradients);
             vec.push_back(path);
         }
         else if (child->value()) {
-            RawElement* text = this->parseText(child);
+            RawElement* text = this->parseText(child, gradients);
             vec.push_back(text);
         }
     }
@@ -585,9 +600,9 @@ std::vector<std::pair<char, Gdiplus::PointF>> GetSVG::parsePathData(rapidxml::xm
     return pathData;
 }
 
-RawElement* GetSVG::parsePath(rapidxml::xml_node<> *node) {
+RawElement* GetSVG::parsePath(rapidxml::xml_node<> *node, std::vector<Gradient*> gradients) {
     Stroke stroke = parseStroke(node->first_attribute());
-    Fill fill = parseFill(node->first_attribute());
+    Fill fill = parseFill(node->first_attribute(), gradients);
     Transform transform;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
@@ -607,6 +622,118 @@ RawElement* GetSVG::parsePath(rapidxml::xml_node<> *node) {
     }
 
     return new Path(pathData, stroke, fill, transform);
+}
+
+double GetSVG::getDoubleValue(const std::string &s) {
+    if (s.find('%') != std::string::npos) {
+        return stod(s.substr(0, s.find('%'))) / 100;
+    }
+    return stod(s);
+}
+
+void GetSVG::gradientAttribute(const std::string attName, const std::string attValue, double &x1, double &y1, double &x2, double y2, double &cx, double &cy, double &r, double &fx, double &fy, double &fr) {
+    if (attName == "x1") {
+        x1 = getDoubleValue(attValue);
+    }
+    else if (attName == "x2") {
+        x2 = getDoubleValue(attValue);
+    }
+    else if (attName == "y1") {
+        y1 = getDoubleValue(attValue);
+    }
+    else if (attName == "y2") {
+        y2 = getDoubleValue(attValue);
+    }
+    else if (attName == "cx") {
+        cx = getDoubleValue(attValue);
+    }
+    else if (attName == "cy") {
+        cy = getDoubleValue(attValue);
+    }
+    else if (attName == "r") {
+        r = getDoubleValue(attValue);
+    }
+    else if (attName == "fx") {
+        fx = getDoubleValue(attValue);
+    }
+    else if (attName == "fy") {
+        fy = getDoubleValue(attValue);
+    }
+    else if (attName == "fr") {
+        fr = getDoubleValue(attValue);
+    }
+}
+
+void GetSVG::stopAttribute(const std::string attName, const std::string attValue, double &offset, std::string &color, double &opacity) {
+    if (attName == "offset") {
+        offset = getDoubleValue(attValue);
+    }
+    else if (attName == "stop-color") {
+        color = attValue;
+    }
+    else if (attName == "stop-opacity") {
+        opacity = getDoubleValue(attValue);
+    }
+}
+
+std::vector<Gradient*> GetSVG::parseGradient(rapidxml::xml_node<> *defs) {
+    std::vector<Gradient*> gradients;
+    if (!defs) {
+        return gradients;
+    }
+
+    for (rapidxml::xml_node<>* gradient = defs->first_node(); gradient; gradient = gradient->next_sibling()) {
+        std::string gradientType = gradient->name();
+        std::string id;
+        std::string units = "objectBoundingBox", transform = "None", spreadMethod = "pad";
+        
+        double x1 = 0.5, y1 = 0.5, x2 = 0.5, y2 = 0.5, cx = 0.5, cy = 0.5, r = 0.5, fx, fy, fr;
+        int gradientTypeValue = 1;
+        rapidxml::xml_attribute<>* idAttr = gradient->first_attribute("id");
+        if (idAttr) {
+            id = idAttr->value();
+        }
+
+        for (rapidxml::xml_attribute<>* attr = gradient->first_attribute(); attr; attr = attr->next_attribute()) {
+            std::string attName = attr->name();
+            std::string attValue = attr->value();
+
+            gradientAttribute(attName, attValue, x1, y1, x2, y2, cx, cy, r, fx, fy, fr);
+            if (attName == "gradientUnits") {
+                units = attValue;
+            }
+            else if (attName == "gradientTransform") {
+                transform = attValue;
+            }
+            else if (attName == "spreadMethod") {
+                spreadMethod = attValue;
+            }
+        }
+
+        std::vector<Stop> stops;
+        for (rapidxml::xml_node<>* stop = gradient->first_node("stop"); stop; stop = stop->next_sibling("stop")) {
+            std::string color;
+            double offset, opacity;
+            for (rapidxml::xml_attribute<>* attr = stop->first_attribute(); attr; attr = attr->next_attribute()) {
+                std::string attName = attr->name();
+                std::string attValue = attr->value();
+                stopAttribute(attName, attValue, offset, color, opacity);
+            }
+            Stop temp(offset, color, opacity);
+            stops.push_back(temp);
+        }
+
+        Gradient* gradi;
+
+        if (gradientType == "linearGradient") {
+            gradi = new LinearGradient(id, units, transform, spreadMethod, stops, Gdiplus::PointF(x1, y1), Gdiplus::PointF(x2, y2));
+        }
+        else {
+            gradi = new RadialGradient(id, units, transform, spreadMethod, stops, Gdiplus::PointF(cx, cy), r, Gdiplus::PointF(fx, fy), fr);
+        }
+        gradients.push_back(gradi);
+    }
+    return gradients;
 }
 
 std::vector<RawElement*> GetSVG::parseSVGFile(const std::string& filePath){
@@ -664,43 +791,46 @@ std::vector<RawElement*> GetSVG::parseSVGFile(const std::string& filePath){
 
     }
 
+    rapidxml::xml_node<>* defs = doc.first_node("svg")->first_node("defs");
+    std::vector<Gradient*> gradients = parseGradient(defs);
+
     if (root){
         for (rapidxml::xml_node<> *child = root->first_node(); child; child = child->next_sibling()) {
             std::string shapeName = child->name();
             if (shapeName == "rect"){
-                RawElement* rect = this->parseRect(child);
+                RawElement* rect = this->parseRect(child, gradients);
                 vec.push_back(rect);
             }
             else if (shapeName == "circle"){
-                RawElement* circle = this->parseCircle(child);
+                RawElement* circle = this->parseCircle(child, gradients);
                 vec.push_back(circle);
             }
             else if (shapeName == "ellipse"){
-                RawElement* ellip = this->parseEllipse(child);
+                RawElement* ellip = this->parseEllipse(child, gradients);
                 vec.push_back(ellip);
             }
             else if (shapeName == "polygon"){
-                RawElement* polygon = this->parsePolygon(child);
+                RawElement* polygon = this->parsePolygon(child, gradients);
                 vec.push_back(polygon);
             }
             else if (shapeName == "polyline"){
-                RawElement* polyline = this->parsePolyline(child);
+                RawElement* polyline = this->parsePolyline(child, gradients);
                 vec.push_back(polyline);
             }
             else if (shapeName == "line"){
-                RawElement* line = this->parseLine(child);
+                RawElement* line = this->parseLine(child, gradients);
                 vec.push_back(line);
             }
             else if (shapeName == "g") {
-                RawElement* group = this->parseGroup(child, doc);
+                RawElement* group = this->parseGroup(child, doc, gradients);
                 vec.push_back(group);
             }
             else if (shapeName == "path") {
-                RawElement* path = this->parsePath(child);
+                RawElement* path = this->parsePath(child, gradients);
                 vec.push_back(path);
             }
             else if (child->value()) {
-                RawElement* text = this->parseText(child);
+                RawElement* text = this->parseText(child, gradients);
                 vec.push_back(text);
             }
         }

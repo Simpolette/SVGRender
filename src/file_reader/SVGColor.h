@@ -166,6 +166,7 @@ private:
     int g;
     int b;
 public:
+    SVGColor();
     SVGColor(const std::string& color);
     int getR() const;
     int getG() const;

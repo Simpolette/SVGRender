@@ -4,13 +4,15 @@ Fill::Fill(){
     this->color = Gdiplus::Color(0, 0, 0);
     this->opacity = 1;
     this->rule = "nonezero";
+    this->gradient = NULL;
 }
 
-Fill::Fill(std::string color, double opacity, std::string rule){
+Fill::Fill(std::string color, double opacity, std::string rule, Gradient* gradient) {
     SVGColor fillColor(color);
     this->color = Gdiplus::Color(fillColor.getR(), fillColor.getG(), fillColor.getB());
     this->opacity = opacity;
     this->rule = rule;
+    this->gradient = gradient;
 }
 
 Gdiplus::Color Fill::getColorA() const {
