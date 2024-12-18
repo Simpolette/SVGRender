@@ -17,6 +17,7 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
     pathGraphics.StartFigure();  // Bắt đầu một hình vẽ mới
 
     for (size_t i = 0; i < pathData.size(); ++i) {
+
         char command = pathData[i].first;
         Gdiplus::PointF point = pathData[i].second;
 
@@ -48,6 +49,39 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
                 i += 2;  // Di chuyển chỉ số tới điểm tiếp theo sau ba điểm điều khiển
             }
             break;
+
+        case 'S':  // Smooth cubic Bézier curve
+            if (i + 1 < pathData.size()) {
+                Gdiplus::PointF controlPoint1;
+
+                if (i - 2 > 0 && (pathData[i - 2].first == 'C' || pathData[i - 2].first == 'S')) {
+                    // Tính điểm đối xứng của điểm điều khiển trước đó
+                    controlPoint1 = Gdiplus::PointF(
+                        2 * currentPoint.X - pathData[i - 2].second.X, 
+                        2 * currentPoint.Y - pathData[i - 2].second.Y
+                    );
+
+                } 
+                else if (i - 2 > 0 && (pathData[i - 2].first == 'c' || pathData[i - 2].first == 's')){
+                    Gdiplus::PointF absPreviousPoint = Gdiplus::PointF(currentPoint.X - pathData[i - 1].second.X + pathData[i - 2].second.X, currentPoint.Y - pathData[i - 1].second.Y + pathData[i - 2].second.Y);
+                    controlPoint1 = Gdiplus::PointF(
+                        2 * currentPoint.X - absPreviousPoint.X, 
+                        2 * currentPoint.Y - absPreviousPoint.Y
+                    );
+
+                } else {
+                    // Nếu không có lệnh Bézier trước đó, dùng currentPoint
+                    controlPoint1 = currentPoint;
+                }
+
+                Gdiplus::PointF endPoint = pathData[i + 1].second;
+
+                pathGraphics.AddBezier(currentPoint, controlPoint1, point, endPoint);
+                currentPoint = endPoint;
+                i += 1;
+            }
+            break;
+
         case 'Z':  // ClosePath (đóng đường vẽ)
             pathGraphics.CloseFigure();  // Đóng đường vẽ mà không cần AddLine
             break;
@@ -82,9 +116,50 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
                 i += 2;  // Di chuyển chỉ số tới điểm tiếp theo sau ba điểm điều khiển
             }
             break;
-        case 's':  // smooth cubic Bezier curve (đường cong Bezier bậc 3 mượt mà theo tọa độ tương đối)
-            // Implement tương tự như đường cong Bezier bậc 3, nhưng với điều kiện mượt mà
+        case 's':  // Relative smooth cubic Bézier curve
+            if (i + 1 < pathData.size()) {
+                Gdiplus::PointF controlPoint1;
+
+                if (i - 2 > 0 && (pathData[i - 2].first == 'C' || pathData[i - 2].first == 'S')) {
+
+                    controlPoint1 = Gdiplus::PointF(
+                        2 * currentPoint.X - pathData[i - 2].second.X,
+                        2 * currentPoint.Y - pathData[i - 2].second.Y
+                    );
+                } else if (i - 2 > 0 && (pathData[i - 2].first == 'c' || pathData[i - 2].first == 's')) {
+
+                    Gdiplus::PointF absPreviousPoint = Gdiplus::PointF(
+                        currentPoint.X - pathData[i - 1].second.X + pathData[i - 2].second.X,
+                        currentPoint.Y - pathData[i - 1].second.Y + pathData[i - 2].second.Y
+                    );
+
+                    controlPoint1 = Gdiplus::PointF(
+                        2 * currentPoint.X - absPreviousPoint.X,
+                        2 * currentPoint.Y - absPreviousPoint.Y
+                    );
+                } else {
+
+                    controlPoint1 = currentPoint;
+                }
+
+                Gdiplus::PointF controlPoint2 = Gdiplus::PointF(
+                    currentPoint.X + pathData[i].second.X,
+                    currentPoint.Y + pathData[i].second.Y
+                );
+
+                Gdiplus::PointF endPoint = Gdiplus::PointF(
+                    currentPoint.X + pathData[i + 1].second.X,
+                    currentPoint.Y + pathData[i + 1].second.Y
+                );
+
+                pathGraphics.AddBezier(currentPoint, controlPoint1, controlPoint2, endPoint);
+
+                currentPoint = endPoint;
+
+                i += 1;
+            }
             break;
+
         case 'z':  // closePath (đóng đường vẽ)
             pathGraphics.CloseFigure();
             break;
