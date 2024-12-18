@@ -36,6 +36,7 @@ private:
     bool checkAlpha(char ch);
     bool checkNumber(char ch);
     void standardizeString(std::string& s);
+    std::string standardizeText(std::string text);
     int countAttrVal(const std::string& attrValue);
     Stroke parseStroke(rapidxml::xml_attribute<> *attr);
     Fill parseFill(rapidxml::xml_attribute<> *attr);

@@ -324,7 +324,7 @@ RawElement* GetSVG::parseLine(rapidxml::xml_node<> *node){
 }
 
 RawElement* GetSVG::parseText(rapidxml::xml_node<> *node){
-    std::string content = node->value();
+    std::string content = standardizeText(node->value());
     double font_size = 16;
     double x = 0, y = 0;
     std::string font_family = "Times New Roman";
@@ -448,22 +448,57 @@ bool GetSVG::checkAlpha(char ch){
     return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z'); 
 }
 
+std::string GetSVG::standardizeText(std::string text){
+    std::replace(text.begin(), text.end(), '\t', ' ');
+    std::replace(text.begin(), text.end(), '\n', ' ');
+    
+    std::string s = "";
+    int n = text.size();
+    bool isPrevSpace = false;
+    if (n > 1 && text[0] == ' '){
+        isPrevSpace = true;
+    }
+    for (int i = 0; i < n; i++){
+        if (text[i] == ' '){
+            if (!isPrevSpace){
+                s += text[i];
+                isPrevSpace = true;
+            }
+        }
+        else{
+            s += text[i];
+            isPrevSpace = false;
+        }
+    }
+    
+    return s;
+}
+
+
 void GetSVG::standardizeString(std::string& s){
     std::replace(s.begin(), s.end(), ',', ' ');
     int n = s.size();
+    bool isPrevComma = false;
     // Case: Command with no space at first
-    if (n > 1 && checkAlpha(s[0]) && s[1] != ' '){
-        s.insert(s.begin() + 1, ' ');
-        n++;
+    if (n > 1){
+        if (checkAlpha(s[0]) && s[1] != ' '){
+            s.insert(s.begin() + 1, ' ');
+            n++;
+        }
+        else if (s[0] == '.'){
+            isPrevComma = true;
+        }
     }
     for (int i = 1; i < n; i++){
         // It will always start with something else than '-' so no segmentation fault
         if ((s[i] == '-') && s[i - 1] != ' '){
+            isPrevComma = false;
             s.insert(s.begin() + i, ' ');
             i++;
             n++;
         }
         else if (checkAlpha(s[i])){
+            isPrevComma = false;
             int curPos = i;
             if (s[curPos + 1] != ' '){
                 s.insert(s.begin() + curPos + 1, ' ');
@@ -474,6 +509,20 @@ void GetSVG::standardizeString(std::string& s){
                 s.insert(s.begin() + curPos, ' ');
                 i++;
                 n++;
+            }
+        }
+        else if (s[i] == ' '){
+            isPrevComma = false;
+        }
+        else if (s[i] == '.'){
+            int curPos = i;
+            if (isPrevComma){
+                s.insert(s.begin() + curPos, ' ');
+                i++;
+                n++;
+            }
+            else{
+                isPrevComma = true;
             }
         }
     }
