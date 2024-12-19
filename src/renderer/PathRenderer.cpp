@@ -81,6 +81,20 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
                 i += 1;
             }
             break;
+        case 'Q':
+            if (i + 1 < pathData.size()) {
+            // startPoint = point, endPoint;
+                Gdiplus::PointF endPoint = pathData[i + 1].second;
+                Gdiplus::PointF ctrl1 = Gdiplus::PointF(currentPoint.X + (2.0f / 3.0f) * (point.X - currentPoint.X),
+                                                        currentPoint.Y + (2.0f / 3.0f) * (point.Y - currentPoint.Y));
+
+                Gdiplus::PointF ctrl2 = Gdiplus::PointF(endPoint.X + (2.0f / 3.0f) * (point.X - endPoint.X),
+                                                        endPoint.Y + (2.0f / 3.0f) * (point.Y - endPoint.Y));
+                pathGraphics.AddBezier(currentPoint, ctrl1, ctrl2, endPoint);
+                currentPoint = endPoint;
+                i += 1;
+            }
+            break;
 
         case 'Z':  // ClosePath (đóng đường vẽ)
             pathGraphics.CloseFigure();  // Đóng đường vẽ mà không cần AddLine
@@ -114,6 +128,23 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
                 pathGraphics.AddBezier(currentPoint, Gdiplus::PointF(currentPoint.X + point.X, currentPoint.Y + point.Y), controlPoint1, controlPoint2);
                 currentPoint = controlPoint2;  // Cập nhật currentPoint là điểm kết thúc của đường cong Bezier
                 i += 2;  // Di chuyển chỉ số tới điểm tiếp theo sau ba điểm điều khiển
+            }
+            break;
+
+        case 'q':
+            if (i + 1 < pathData.size()) {
+                // startPoint = point, endPoint;
+                Gdiplus::PointF endPoint = Gdiplus::PointF(currentPoint.X + pathData[i + 1].second.X, currentPoint.Y + pathData[i + 1].second.Y);
+                point = Gdiplus::PointF(currentPoint.X + pathData[i].second.X, currentPoint.Y + pathData[i].second.Y);
+
+                Gdiplus::PointF ctrl1 = Gdiplus::PointF(currentPoint.X + (2.0f / 3.0f) * (point.X - currentPoint.X),
+                                                        currentPoint.Y + (2.0f / 3.0f) * (point.Y - currentPoint.Y));
+
+                Gdiplus::PointF ctrl2 = Gdiplus::PointF(endPoint.X + (2.0f / 3.0f) * (point.X - endPoint.X),
+                                                        endPoint.Y + (2.0f / 3.0f) * (point.Y - endPoint.Y));
+                pathGraphics.AddBezier(currentPoint, ctrl1, ctrl2, endPoint);
+                currentPoint = endPoint;
+                i += 1;
             }
             break;
         case 's':  // Relative smooth cubic Bézier curve
@@ -159,6 +190,8 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
                 i += 1;
             }
             break;
+
+
 
         case 'z':  // closePath (đóng đường vẽ)
             pathGraphics.CloseFigure();

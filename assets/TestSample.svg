@@ -1,5 +1,6 @@
 <svg height="2100" width="4000" xmlns="http://www.w3.org/2000/svg">
 
-  <path d="M 100 200 C 150 100, 200 100, 300 200 s 400 300, 500 200" fill="none" stroke="green" stroke-width="3" />
-  
+  <path  d="M 10 10 Q 50 50, 90 10 Q 130 50, 170 10" fill="none" stroke="green" stroke-width="3" />
+   
+  <path  d="M 10 100 q 40 40, 80 0 q 40 -40, 80 0" fill="none" stroke="green" stroke-width="3" />
 </svg>
