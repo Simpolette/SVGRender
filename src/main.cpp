@@ -60,8 +60,8 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
 {
-   // AllocConsole();
-   // freopen("CONOUT$", "w", stdout);
+   AllocConsole();
+   freopen("CONOUT$", "w", stdout);
    HWND                hWnd;
    MSG                 msg;
    WNDCLASS            wndClass;
@@ -107,7 +107,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
    }
    
    GdiplusShutdown(gdiplusToken);
-   // FreeConsole();
+   FreeConsole();
    return msg.wParam;
 }  // WinMain
 

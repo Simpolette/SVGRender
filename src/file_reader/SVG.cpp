@@ -118,7 +118,8 @@ Transform GetSVG::parseTransform(const std::string& transformVal){
 
     std::istringstream ss(transformVal);
     std::string transform;
-
+    std::vector<std::pair<std::string, std::string>> transforms;
+    
     while (getline(ss, transform, ')')){
         std::istringstream ss2(transform);
         std::string attrName;
@@ -127,38 +128,27 @@ Transform GetSVG::parseTransform(const std::string& transformVal){
         getline(ss2, attrName, '(');
         getline(ss2, attrValue, ')');
         standardizeString(attrValue);
-        std::istringstream ss3(attrValue);
-        
+                
         int cnt = countAttrVal(attrValue);
 
         if (attrName.find("translate") != std::string::npos){
-            double x, y;
-            ss3 >> x >> y;
-            translate = Gdiplus::PointF(x, y);
+            attrName = "translate";
         }
         else if (attrName.find("scale") != std::string::npos){
-            double x, y;
-            if (cnt >= 1){
-                ss3 >> x;
-                y = x;
-            }
-            if (cnt >= 2){
-                ss3 >> y;
-            }
-            scale = Gdiplus::PointF(x, y);
+            attrName = "scale";
+            attrValue = std::to_string(cnt) + " " + attrValue;
         }
         else if (attrName.find("rotate") != std::string::npos){
-            double x, y;
-            if (cnt >= 1){
-                ss3 >> rotate;
-            }
-            if (cnt >= 3){
-                ss3 >> x >> y;
-            }
+            attrName = "rotate";
+            attrValue = std::to_string(cnt) + " " + attrValue;
         }
+        else if (attrName.find("matrix") != std::string::npos){
+            attrName = "matrix";
+        }
+        transforms.push_back(std::make_pair(attrName, attrValue));
     }
 
-    return Transform(translate, scale, rotate);
+    return Transform(transforms);
 }
 
 RawElement* GetSVG::parseRect(rapidxml::xml_node<> *node){
