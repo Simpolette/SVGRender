@@ -21,7 +21,24 @@ TextRenderer::TextRenderer(const Fill& fill, const Stroke& stroke, const Transfo
     double topLeftY = point.Y - ascentOffset;
 
     origin = Gdiplus::PointF(point.X, topLeftY);
-    format.SetAlignment(Gdiplus::StringAlignmentNear);
+
+    Gdiplus::Bitmap bitmap(1, 1);
+    Gdiplus::Graphics graphics(&bitmap);
+    Gdiplus::RectF textBounds;
+    Gdiplus::Font font(family, emSize, Gdiplus::FontStyleRegular, Gdiplus::UnitPixel);
+    graphics.MeasureString(content.c_str(), -1, &font, origin, &textBounds);
+    if (text.getTextAnchor() == "middle"){
+        format.SetAlignment(Gdiplus::StringAlignmentCenter);
+    }
+    else if (text.getTextAnchor() == "end"){
+        origin.X += 0.15 * emSize;
+        format.SetAlignment(Gdiplus::StringAlignmentFar);
+    }
+    else{
+        origin.X -= 0.15 * emSize;
+        format.SetAlignment(Gdiplus::StringAlignmentNear);
+    }
+
 }
 
 void TextRenderer::render(Gdiplus::Graphics& graphics) const{
@@ -29,7 +46,6 @@ void TextRenderer::render(Gdiplus::Graphics& graphics) const{
     graphics.GetTransform(&originalMatrix);
     graphics.MultiplyTransform(matrix);
 
-    
     Gdiplus::GraphicsPath text;
     text.StartFigure();
     text.AddString(content.c_str(), length, family, style, emSize, origin, &format);

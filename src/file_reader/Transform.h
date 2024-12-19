@@ -4,18 +4,15 @@
 #include <windows.h>
 #include <Gdiplus.h>
 #include <iostream>
+#include <vector>
 
 class Transform{
 private:
-    Gdiplus::PointF translate;
-    Gdiplus::PointF scale;
-    double rotate;
+    std::vector<std::pair<std::string, std::string>> transforms;
 public:
-    Gdiplus::PointF getTranslate() const;
-    Gdiplus::PointF getScale() const;
-    double getRotate() const;
     Transform();
-    Transform(Gdiplus::PointF translate, Gdiplus::PointF scale, double rotate);
+    Transform(std::vector<std::pair<std::string, std::string>> transforms);
+    std::vector<std::pair<std::string, std::string>> getTransforms() const;
     void print() const;
 };
 

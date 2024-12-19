@@ -4,6 +4,7 @@
 #include <Windows.h>
 #include <Gdiplus.h>
 #include <objidl.h>
+#include <sstream>
 #include "../file_reader/SVG.h"
 
 #pragma comment (lib, "Gdiplus.lib")
