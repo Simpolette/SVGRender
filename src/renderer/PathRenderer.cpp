@@ -83,19 +83,90 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
             break;
         case 'Q':
             if (i + 1 < pathData.size()) {
-            // startPoint = point, endPoint;
+                // startPoint = point, endPoint;
                 Gdiplus::PointF endPoint = pathData[i + 1].second;
-                Gdiplus::PointF ctrl1 = Gdiplus::PointF(currentPoint.X + (2.0f / 3.0f) * (point.X - currentPoint.X),
-                                                        currentPoint.Y + (2.0f / 3.0f) * (point.Y - currentPoint.Y));
 
-                Gdiplus::PointF ctrl2 = Gdiplus::PointF(endPoint.X + (2.0f / 3.0f) * (point.X - endPoint.X),
-                                                        endPoint.Y + (2.0f / 3.0f) * (point.Y - endPoint.Y));
+                // Sử dụng double cho các phép tính chính xác hơn
+                double dx1 = point.X - currentPoint.X;
+                double dy1 = point.Y - currentPoint.Y;
+                Gdiplus::PointF ctrl1 = Gdiplus::PointF(
+                    currentPoint.X + (2.0 / 3.0) * dx1,
+                    currentPoint.Y + (2.0 / 3.0) * dy1
+                );
+
+                double dx2 = point.X - endPoint.X;
+                double dy2 = point.Y - endPoint.Y;
+                Gdiplus::PointF ctrl2 = Gdiplus::PointF(
+                    endPoint.X + (2.0 / 3.0) * dx2,
+                    endPoint.Y + (2.0 / 3.0) * dy2
+                );
+
+                // Chỉ làm tròn khi thực sự cần thiết (ví dụ, khi vẽ)
                 pathGraphics.AddBezier(currentPoint, ctrl1, ctrl2, endPoint);
+
                 currentPoint = endPoint;
                 i += 1;
             }
             break;
 
+        case 'T':  // Smooth cubic Bézier curve
+            if (i < pathData.size()) {
+
+                Gdiplus::PointF ctrl1;
+                Gdiplus::PointF ctrl2;
+                if (i - 1 > 0 && (pathData[i - 1].first == 'Q' || pathData[i - 1].first == 'T')) {
+                    // Tính điểm đối xứng của điểm điều khiển trước đó
+                    Gdiplus::PathData pathData;
+                    pathGraphics.GetPathData(&pathData);
+                    int size = pathData.Count;
+                    Gdiplus::PointF prevCtrl1 = pathData.Points[size - 3];
+                    Gdiplus::PointF prevCtrl2 = pathData.Points[size - 2];
+
+                    ctrl1 = Gdiplus::PointF(
+                        2 * currentPoint.X - prevCtrl1.X, 
+                        2 * currentPoint.Y - prevCtrl1.Y
+                    );
+
+                    ctrl2 = Gdiplus::PointF(
+                        2 * currentPoint.X - prevCtrl2.X, 
+                        2 * currentPoint.Y - prevCtrl2.Y
+                    );
+                } 
+                else if (i - 1 > 0 && (pathData[i - 1].first == 'q' || pathData[i - 1].first == 't')) {
+                    // Tính điểm đối xứng của điểm điều khiển trước đó
+                    Gdiplus::PathData pathData;
+                    pathGraphics.GetPathData(&pathData);
+                    int size = pathData.Count;
+                    Gdiplus::PointF prevCtrl1 = pathData.Points[size - 3];
+                    Gdiplus::PointF prevCtrl2 = pathData.Points[size - 2];
+
+                    ctrl1 = Gdiplus::PointF(
+                        2 * currentPoint.X - prevCtrl1.X, 
+                        2 * currentPoint.Y - prevCtrl1.Y
+                    );
+
+                    ctrl2 = Gdiplus::PointF(
+                        2 * currentPoint.X - prevCtrl2.X, 
+                        2 * currentPoint.Y - prevCtrl2.Y
+                    );
+                } 
+
+                else {
+                    // Nếu không có lệnh Bézier trước đó, dùng currentPoint
+                    ctrl1 = currentPoint;
+                    ctrl2 = currentPoint;
+                }
+
+                Gdiplus::PointF endPoint = point;
+
+                
+
+                pathGraphics.AddBezier(currentPoint, ctrl2, ctrl1, endPoint);
+                currentPoint = endPoint;
+
+                
+            }
+            break;
         case 'Z':  // ClosePath (đóng đường vẽ)
             pathGraphics.CloseFigure();  // Đóng đường vẽ mà không cần AddLine
             break;
@@ -188,6 +259,44 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
                 currentPoint = endPoint;
 
                 i += 1;
+            }
+            break;
+        case 't':  // Smooth cubic Bézier curve (relative)
+            if (i < pathData.size()) {
+
+                Gdiplus::PointF ctrl1;
+                Gdiplus::PointF ctrl2;
+
+                if (i - 1 > 0 && (pathData[i - 1].first == 'q' || pathData[i - 1].first == 't')) {
+                    // Tính điểm đối xứng của điểm điều khiển trước đó (relative coordinates)
+                    Gdiplus::PathData pathData;
+                    pathGraphics.GetPathData(&pathData);
+                    int size = pathData.Count;
+                    Gdiplus::PointF prevCtrl1 = pathData.Points[size - 3];
+                    Gdiplus::PointF prevCtrl2 = pathData.Points[size - 2];
+
+                    // Sử dụng relative coordinates so với currentPoint
+                    ctrl1 = Gdiplus::PointF(
+                        2 * currentPoint.X - prevCtrl1.X, 
+                        2 * currentPoint.Y - prevCtrl1.Y
+                    );
+
+                    ctrl2 = Gdiplus::PointF(
+                        2 * currentPoint.X - prevCtrl2.X, 
+                        2 * currentPoint.Y - prevCtrl2.Y
+                    );
+                } 
+                else {
+                    // Nếu không có lệnh Bézier trước đó, dùng currentPoint cho các điều khiển
+                    ctrl1 = currentPoint;
+                    ctrl2 = currentPoint;
+                }
+
+                Gdiplus::PointF endPoint = point; // Điểm kết thúc (tương đối với currentPoint)
+
+                // Thêm lệnh Bézier cubic vào đồ họa (relative)
+                pathGraphics.AddBezier(currentPoint, ctrl2, ctrl1, endPoint);
+                currentPoint = endPoint;
             }
             break;
 
