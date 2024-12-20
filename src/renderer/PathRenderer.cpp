@@ -1,4 +1,16 @@
 ﻿#include "PathRenderer.h"
+#include <cmath>
+
+
+const double PI = 3.14159265358979323846;  // Định nghĩa lại nếu chưa có
+
+
+float CalculateVectorAngle(float x, float y)
+{
+    float angle = atan2(y, x);
+    
+    return (angle * 180) / PI;
+}
 
 PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Path& path)
 : Renderer(fill, stroke, transform) {
@@ -116,11 +128,11 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
                 Gdiplus::PointF ctrl2;
                 if (i - 1 > 0 && (pathData[i - 1].first == 'Q' || pathData[i - 1].first == 'T')) {
                     // Tính điểm đối xứng của điểm điều khiển trước đó
-                    Gdiplus::PathData pathData;
-                    pathGraphics.GetPathData(&pathData);
-                    int size = pathData.Count;
-                    Gdiplus::PointF prevCtrl1 = pathData.Points[size - 3];
-                    Gdiplus::PointF prevCtrl2 = pathData.Points[size - 2];
+                    Gdiplus::PathData pathDataF;
+                    pathGraphics.GetPathData(&pathDataF);
+                    int size = pathDataF.Count;
+                    Gdiplus::PointF prevCtrl1 = pathDataF.Points[size - 3];
+                    Gdiplus::PointF prevCtrl2 = pathDataF.Points[size - 2];
 
                     ctrl1 = Gdiplus::PointF(
                         2 * currentPoint.X - prevCtrl1.X, 
@@ -134,11 +146,11 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
                 } 
                 else if (i - 1 > 0 && (pathData[i - 1].first == 'q' || pathData[i - 1].first == 't')) {
                     // Tính điểm đối xứng của điểm điều khiển trước đó
-                    Gdiplus::PathData pathData;
-                    pathGraphics.GetPathData(&pathData);
-                    int size = pathData.Count;
-                    Gdiplus::PointF prevCtrl1 = pathData.Points[size - 3];
-                    Gdiplus::PointF prevCtrl2 = pathData.Points[size - 2];
+                    Gdiplus::PathData pathDataF;
+                    pathGraphics.GetPathData(&pathDataF);
+                    int size = pathDataF.Count;
+                    Gdiplus::PointF prevCtrl1 = pathDataF.Points[size - 3];
+                    Gdiplus::PointF prevCtrl2 = pathDataF.Points[size - 2];
 
                     ctrl1 = Gdiplus::PointF(
                         2 * currentPoint.X - prevCtrl1.X, 
@@ -167,6 +179,94 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
                 
             }
             break;
+        case 'A': 
+            {
+            float cx,cy,cxp,cyp,theta1,dtheta;
+            Gdiplus::GraphicsPath arc;
+            Gdiplus::Matrix arc_mat;
+            float rx = point.X;
+            float ry = point.Y;
+
+            float phi = pathData[i + 1].second.X;
+
+            int fA = static_cast<int>(pathData[i + 2].second.X);
+            int fS = static_cast<int>(pathData[i + 2].second.Y);
+
+            // tim bounding rect
+            Gdiplus::PointF p1 = currentPoint;
+            Gdiplus::PointF p2 = pathData[i + 3].second;
+
+            if (rx == 0 || ry == 0){
+                pathGraphics.AddLine(p1, p2);
+            }
+
+            rx = abs(rx);
+            ry = abs(ry);
+
+            float x1 = p1.X;
+            float y1 = p1.Y;
+            float x2 = p2.X;
+            float y2 = p2.Y;
+
+
+            float cosPhi = cos(phi);
+            float sinPhi = sin(phi);
+
+            float x1p = (cosPhi * ((x1 - x2) / 2)) + (sinPhi * ((y1 - y2) / 2));
+            float y1p = (-sinPhi * ((x1 - x2) / 2)) + (cosPhi * ((y1 - y2) / 2));
+
+            float en = ((x1p*x1p)/(rx*rx)) + ((y1p*y1p)/(ry*ry));
+
+            if (en > 1) {
+                rx = sqrt(en) * rx;
+                ry = sqrt(en) * ry;
+                cx = (x1 + x2) / 2;
+                cy = (y1 + y2) / 2;
+                theta1 = CalculateVectorAngle(x1 - x2, y1 - y2) - phi;
+                dtheta = 180;
+            } else {
+                en = sqrt(1 / en - 1);
+                cxp = en * rx * y1p / ry;
+                cyp = -en * ry * x1p / rx;
+                if (fA == fS){
+                    cxp = -cxp;
+                    cyp = -cyp;
+                }
+                cx = (cosPhi*cxp - sinPhi*cyp) + ((x1 + x2) / 2);
+                cy = (sinPhi*cxp + cosPhi*cyp) + ((y1 + y2) / 2);
+                theta1 = CalculateVectorAngle(x1p - cxp, y1p - cyp);
+                dtheta = CalculateVectorAngle(-x1p - cxp, -y1p - cyp) - theta1;
+            }
+
+
+            if(fS == 0 && dtheta > 0){
+                dtheta -= 360;
+            }else if(fS == 1 && dtheta < 0){
+                dtheta += 360;
+            }
+            
+
+            Gdiplus::PointF LRect(cx - rx, cy - ry);
+
+            float width = 2 * rx;
+            float height = 2 * ry;
+
+
+
+            arc.AddArc(LRect.X, LRect.Y, width, height, theta1, dtheta);
+            arc_mat.RotateAt(phi, Gdiplus::PointF(cx,cy));
+            arc.Transform(&arc_mat);
+
+            pathGraphics.AddPath(&arc, TRUE);
+
+            currentPoint = p2;
+
+            i += 3;
+             
+        }
+            break;
+            
+
         case 'Z':  // ClosePath (đóng đường vẽ)
             pathGraphics.CloseFigure();  // Đóng đường vẽ mà không cần AddLine
             break;
@@ -178,9 +278,11 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
             currentPoint.Y += point.Y;  // Di chuyển tương đối
             break;
         case 'l':  // lineTo (vẽ đường thẳng theo tọa độ tương đối)
-            pathGraphics.AddLine(currentPoint, Gdiplus::PointF(currentPoint.X + point.X, currentPoint.Y + point.Y));
-            currentPoint.X += point.X;  // Cập nhật tọa độ hiện tại theo tọa độ tương đối
-            currentPoint.Y += point.Y;
+        {
+            Gdiplus::PointF newP = Gdiplus::PointF(currentPoint.X + point.X, currentPoint.Y + point.Y);
+            pathGraphics.AddLine(currentPoint, newP);
+            currentPoint = newP;
+        }
             break;
         case 'h':  // horizontal lineTo (vẽ đường ngang theo tọa độ tương đối)
             pathGraphics.AddLine(currentPoint, Gdiplus::PointF(currentPoint.X + point.X, currentPoint.Y));
@@ -301,7 +403,94 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
             break;
 
 
+        case 'a':{
+           
+                Gdiplus::GraphicsPath arc;
+                Gdiplus::Matrix arc_mat;
+                float cx,cy,cxp,cyp,theta1,dtheta;
 
+                float rx = point.X;
+                float ry = point.Y;
+
+                float phi = pathData[i + 1].second.X;
+
+                int fA = static_cast<int>(pathData[i + 2].second.X);
+                int fS = static_cast<int>(pathData[i + 2].second.Y);
+
+                // tim bounding rect
+                Gdiplus::PointF p1 = currentPoint;
+                Gdiplus::PointF p2 = Gdiplus::PointF(pathData[i + 3].second.X + currentPoint.X, pathData[i + 3].second.Y + currentPoint.Y);
+
+
+                if (rx == 0 || ry == 0){
+                    pathGraphics.AddLine(p1, p2);
+                }
+
+                rx = abs(rx);
+                ry = abs(ry);
+
+                float x1 = p1.X;
+                float y1 = p1.Y;
+                float x2 = p2.X;
+                float y2 = p2.Y;
+
+
+                float cosPhi = cos(phi);
+                float sinPhi = sin(phi);
+
+                float x1p = (cosPhi * ((x1 - x2) / 2)) + (sinPhi * ((y1 - y2) / 2));
+                float y1p = (-sinPhi * ((x1 - x2) / 2)) + (cosPhi * ((y1 - y2) / 2));
+
+                float en = ((x1p*x1p)/(rx*rx)) + ((y1p*y1p)/(ry*ry));
+
+                if (en > 1) {
+                    rx = sqrt(en) * rx;
+                    ry = sqrt(en) * ry;
+                    cx = (x1 + x2) / 2;
+                    cy = (y1 + y2) / 2;
+                    theta1 = CalculateVectorAngle(x1 - x2, y1 - y2) - phi;
+                    dtheta = 180.0000001;
+                } else {
+                    en = sqrt(1 / en - 1);
+                    cxp = en * rx * y1p / ry;
+                    cyp = -en * ry * x1p / rx;
+                    if (fA == fS){
+                        cxp = -cxp;
+                        cyp = -cyp;
+                    }
+                    cx = (cosPhi*cxp - sinPhi*cyp) + ((x1 + x2) / 2);
+                    cy = (sinPhi*cxp + cosPhi*cyp) + ((y1 + y2) / 2);
+                    theta1 = CalculateVectorAngle(x1p - cxp, y1p - cyp);
+                    dtheta = CalculateVectorAngle(-x1p - cxp, -y1p - cyp) - theta1;
+                }
+
+
+                if(fS == 0 && dtheta > 0){
+                    dtheta -= 360.000001;
+                }else if(fS == 1 && dtheta < 0){
+                    dtheta += 360.000001;
+                }
+                
+
+                Gdiplus::PointF LRect(cx - rx, cy - ry);
+
+                float width = 2 * rx;
+                float height = 2 * ry;
+
+
+
+                arc.AddArc(LRect.X, LRect.Y, width, height, theta1, dtheta);
+                arc_mat.RotateAt(phi, Gdiplus::PointF(cx,cy));
+                arc.Transform(&arc_mat);
+
+                pathGraphics.AddPath(&arc, TRUE);
+
+                currentPoint = p2;
+
+                i += 3;
+            
+            }
+            break;
         case 'z':  // closePath (đóng đường vẽ)
             pathGraphics.CloseFigure();
             break;
