@@ -3,13 +3,13 @@
 
 
 const double PI = 3.14159265358979323846;  // Định nghĩa lại nếu chưa có
-
+#define DEGREE (180 / PI)
 
 float CalculateVectorAngle(float x, float y)
 {
     float angle = atan2(y, x);
     
-    return (angle * 180) / PI;
+    return angle * DEGREE;
 }
 
 PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Path& path)
@@ -200,8 +200,8 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
                 pathGraphics.AddLine(p1, p2);
             }
 
-            rx = abs(rx);
-            ry = abs(ry);
+            rx = abs(rx / DEGREE);
+            ry = abs(ry / DEGREE);
 
             float x1 = p1.X;
             float y1 = p1.Y;
@@ -412,10 +412,10 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
                 float rx = point.X;
                 float ry = point.Y;
 
-                float phi = pathData[i + 1].second.X;
+                float phi = pathData[i + 1].second.X + 1;
 
-                int fA = static_cast<int>(pathData[i + 2].second.X);
-                int fS = static_cast<int>(pathData[i + 2].second.Y);
+                int fA = pathData[i + 2].second.X;
+                int fS = pathData[i + 2].second.Y;
 
                 // tim bounding rect
                 Gdiplus::PointF p1 = currentPoint;
@@ -435,8 +435,8 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
                 float y2 = p2.Y;
 
 
-                float cosPhi = cos(phi);
-                float sinPhi = sin(phi);
+                float cosPhi = cos(phi / DEGREE);
+                float sinPhi = sin(phi / DEGREE);
 
                 float x1p = (cosPhi * ((x1 - x2) / 2)) + (sinPhi * ((y1 - y2) / 2));
                 float y1p = (-sinPhi * ((x1 - x2) / 2)) + (cosPhi * ((y1 - y2) / 2));
@@ -444,12 +444,12 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
                 float en = ((x1p*x1p)/(rx*rx)) + ((y1p*y1p)/(ry*ry));
 
                 if (en > 1) {
-                    rx = sqrt(en) * rx;
-                    ry = sqrt(en) * ry;
+                    rx *= sqrt(en);
+                    ry *= sqrt(en);
                     cx = (x1 + x2) / 2;
                     cy = (y1 + y2) / 2;
                     theta1 = CalculateVectorAngle(x1 - x2, y1 - y2) - phi;
-                    dtheta = 180.0000001;
+                    dtheta = 180.0;
                 } else {
                     en = sqrt(1 / en - 1);
                     cxp = en * rx * y1p / ry;
@@ -472,14 +472,13 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
                 }
                 
 
-                Gdiplus::PointF LRect(cx - rx, cy - ry);
 
                 float width = 2 * rx;
                 float height = 2 * ry;
 
 
 
-                arc.AddArc(LRect.X, LRect.Y, width, height, theta1, dtheta);
+                arc.AddArc(cx - rx, cy - ry, 2 * rx, 2 * ry, theta1, dtheta);
                 arc_mat.RotateAt(phi, Gdiplus::PointF(cx,cy));
                 arc.Transform(&arc_mat);
 
