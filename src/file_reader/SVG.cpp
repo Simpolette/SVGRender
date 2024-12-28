@@ -151,10 +151,121 @@ Transform GetSVG::parseTransform(const std::string& transformVal){
     return Transform(transforms);
 }
 
+void GetSVG::parseStyle(const std::string &style, Stroke& stroke, Fill& fill) {
+    size_t pos = 0;
+
+    std::string colorFill = "";
+    double opacityFill = 1;
+    std::string ruleFill = "nonezero";
+    std::string idFill;
+
+    std::string colorStroke = "";
+    int widthStroke = 1;
+    double opacityStroke = 0;
+    std::string linecapStroke = "butt";
+    std::vector<double> dasharrayStroke;
+    std::string linejoinStroke = "miter";
+    double miterlimitStroke = 4;
+
+    while (pos < style.length()) {
+        size_t key_end = style.find(':', pos);
+        size_t value_end = style.find(';', key_end);
+
+        if (key_end == std::string::npos) {
+            break;
+        }
+        if (value_end == std::string::npos) {
+            value_end = style.length();
+        }
+
+        std::string key = style.substr(pos, key_end - pos);
+        std::string value = style.substr(key_end + 1, value_end - key_end - 1);
+
+        key.erase(0, key.find_first_not_of(" \t"));
+        key.erase(key.find_last_not_of(" \t") + 1);
+        value.erase(0, value.find_first_not_of(" \t"));
+        value.erase(value.find_last_not_of(" \t") + 1);
+
+        if (key == "fill"){
+            colorFill = value;
+            for (int i = 0; i < colorFill.size(); i++){
+                colorFill[i] = std::tolower(colorFill[i]);
+            }
+            if (colorFill.find("none") != std::string::npos){
+                opacityFill = 0;
+                colorFill = "";
+                break;
+            }
+        }
+        else if (key == "fill-opacity"){
+            opacityFill = stod(value);
+        }
+        else if (key == "fill-rule"){
+            ruleFill = value;
+        }
+        else if (key == "id") {
+            idFill = value;
+        }
+        else if (key == "stroke") {
+            colorStroke = value;
+            for (int i = 0; i < colorStroke.size(); i++){
+                colorStroke[i] = std::tolower(colorStroke[i]);
+            }
+            if (colorStroke.find("none") != std::string::npos){
+                opacityStroke = 0;
+                colorStroke = "";
+                break;
+            }
+        }
+        else if (key == "stroke-width"){
+            widthStroke = stod(value);
+        }
+        else if (key == "stroke-opacity"){
+            opacityStroke = stod(value);
+        }
+        else if (key == "stroke-miterlimit"){
+            miterlimitStroke = stod(value);
+        }
+        else if (key == "stroke-linecap"){
+            linecapStroke = value;
+        }
+        else if (key == "stroke-dasharray"){
+            //Stroke_dasharray
+        }
+        else if (key == "stroke-linejoin"){
+            linejoinStroke = value;
+        }
+
+        if (value_end == std::string::npos) {
+            pos = std::string::npos;
+        }
+        else {
+            pos = value_end + 1;
+        }
+
+    }
+
+    Gradient* tempFill = NULL;
+    fill = Fill(colorFill, opacityFill, ruleFill, tempFill);
+    stroke = Stroke(colorStroke, widthStroke, opacityStroke, linecapStroke, dasharrayStroke, linejoinStroke, miterlimitStroke);
+}
+
 RawElement* GetSVG::parseRect(rapidxml::xml_node<> *node){
     double x = 0, y = 0, width = 0, height = 0;
-    Stroke stroke = parseStroke(node->first_attribute());
-    Fill fill = parseFill(node->first_attribute());
+
+    Stroke stroke = Stroke();
+    Fill fill = Fill();
+    
+    rapidxml::xml_attribute<>* style_attr = node->first_attribute("style");
+    if (style_attr) {
+        std::string style = style_attr->value();
+        parseStyle(style, stroke, fill);
+    } 
+    else {
+        parseStroke(node->first_attribute());
+        parseFill(node->first_attribute());
+    }
+
     Transform transform;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
@@ -182,8 +293,19 @@ RawElement* GetSVG::parseRect(rapidxml::xml_node<> *node){
 
 RawElement* GetSVG::parseCircle(rapidxml::xml_node<> *node){
     double x = 0, y = 0, radius = 0;
-    Stroke stroke = parseStroke(node->first_attribute());
-    Fill fill = parseFill(node->first_attribute());
+    Stroke stroke = Stroke();
+    Fill fill = Fill();
+    
+    rapidxml::xml_attribute<>* style_attr = node->first_attribute("style");
+    if (style_attr) {
+        std::string style = style_attr->value();
+        parseStyle(style, stroke, fill);
+    } 
+    else {
+        parseStroke(node->first_attribute());
+        parseFill(node->first_attribute());
+    }
+
     Transform transform;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
@@ -208,8 +330,19 @@ RawElement* GetSVG::parseCircle(rapidxml::xml_node<> *node){
 
 RawElement* GetSVG::parseEllipse(rapidxml::xml_node<> *node){
     double x = 0, y = 0, rx = 0, ry = 0;
-    Stroke stroke = parseStroke(node->first_attribute());
-    Fill fill = parseFill(node->first_attribute());
+    Stroke stroke = Stroke();
+    Fill fill = Fill();
+    
+    rapidxml::xml_attribute<>* style_attr = node->first_attribute("style");
+    if (style_attr) {
+        std::string style = style_attr->value();
+        parseStyle(style, stroke, fill);
+    } 
+    else {
+        parseStroke(node->first_attribute());
+        parseFill(node->first_attribute());
+    }
+
     Transform transform;
     
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
@@ -239,8 +372,18 @@ RawElement* GetSVG::parseEllipse(rapidxml::xml_node<> *node){
 RawElement* GetSVG::parsePolygon(rapidxml::xml_node<> *node){
     std::string points = "";
 
-    Stroke stroke = parseStroke(node->first_attribute());
-    Fill fill = parseFill(node->first_attribute());
+    Stroke stroke = Stroke();
+    Fill fill = Fill();
+    
+    rapidxml::xml_attribute<>* style_attr = node->first_attribute("style");
+    if (style_attr) {
+        std::string style = style_attr->value();
+        parseStyle(style, stroke, fill);
+    } 
+    else {
+        parseStroke(node->first_attribute());
+        parseFill(node->first_attribute());
+    }
     Transform transform;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
@@ -262,8 +405,18 @@ RawElement* GetSVG::parsePolygon(rapidxml::xml_node<> *node){
 RawElement* GetSVG::parsePolyline(rapidxml::xml_node<> *node){
     std::string points = "";
 
-    Stroke stroke = parseStroke(node->first_attribute());
-    Fill fill = parseFill(node->first_attribute());
+    Stroke stroke = Stroke();
+    Fill fill = Fill();
+    
+    rapidxml::xml_attribute<>* style_attr = node->first_attribute("style");
+    if (style_attr) {
+        std::string style = style_attr->value();
+        parseStyle(style, stroke, fill);
+    } 
+    else {
+        parseStroke(node->first_attribute());
+        parseFill(node->first_attribute());
+    }
     Transform transform;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
@@ -285,8 +438,18 @@ RawElement* GetSVG::parsePolyline(rapidxml::xml_node<> *node){
 RawElement* GetSVG::parseLine(rapidxml::xml_node<> *node){
     double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
 
-    Stroke stroke = parseStroke(node->first_attribute());
-    Fill fill = parseFill(node->first_attribute());
+    Stroke stroke = Stroke();
+    Fill fill = Fill();
+    
+    rapidxml::xml_attribute<>* style_attr = node->first_attribute("style");
+    if (style_attr) {
+        std::string style = style_attr->value();
+        parseStyle(style, stroke, fill);
+    } 
+    else {
+        parseStroke(node->first_attribute());
+        parseFill(node->first_attribute());
+    }
     Transform transform;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
@@ -320,8 +483,18 @@ RawElement* GetSVG::parseText(rapidxml::xml_node<> *node){
     std::string font_family = "Times New Roman";
     std::string font_style = "normal";
     std::string text_anchor = "start";
-    Stroke stroke = parseStroke(node->first_attribute());
-    Fill fill = parseFill(node->first_attribute());
+    Stroke stroke = Stroke();
+    Fill fill = Fill();
+    
+    rapidxml::xml_attribute<>* style_attr = node->first_attribute("style");
+    if (style_attr) {
+        std::string style = style_attr->value();
+        parseStyle(style, stroke, fill);
+    } 
+    else {
+        parseStroke(node->first_attribute());
+        parseFill(node->first_attribute());
+    }
     Transform transform;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
@@ -355,8 +528,18 @@ RawElement* GetSVG::parseText(rapidxml::xml_node<> *node){
 }
 
 RawElement* GetSVG::parseGroup(rapidxml::xml_node<> *node, rapidxml::xml_document<>& doc) {
-    Stroke stroke = parseStroke(node->first_attribute());
-    Fill fill = parseFill(node->first_attribute());
+    Stroke stroke = Stroke();
+    Fill fill = Fill();
+    
+    rapidxml::xml_attribute<>* style_attr = node->first_attribute("style");
+    if (style_attr) {
+        std::string style = style_attr->value();
+        parseStyle(style, stroke, fill);
+    } 
+    else {
+        parseStroke(node->first_attribute());
+        parseFill(node->first_attribute());
+    }
     Transform transform;
 
     std::vector<RawElement*> vec;
@@ -640,8 +823,18 @@ std::vector<std::pair<char, Gdiplus::PointF>> GetSVG::parsePathData(rapidxml::xm
 }
 
 RawElement* GetSVG::parsePath(rapidxml::xml_node<> *node) {
-    Stroke stroke = parseStroke(node->first_attribute());
-    Fill fill = parseFill(node->first_attribute());
+    Stroke stroke = Stroke();
+    Fill fill = Fill();
+    
+    rapidxml::xml_attribute<>* style_attr = node->first_attribute("style");
+    if (style_attr) {
+        std::string style = style_attr->value();
+        parseStyle(style, stroke, fill);
+    } 
+    else {
+        parseStroke(node->first_attribute());
+        parseFill(node->first_attribute());
+    }
     Transform transform;
 
     for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
