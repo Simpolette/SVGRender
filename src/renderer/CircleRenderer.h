@@ -1,7 +1,7 @@
 #ifndef _CIRCLE_RENDERER_H_
 #define _CIRCLE_RENDERER_H_
 
-#include "EllipseRenderer.h"
+#include "Renderer.h"
 
 class CircleRenderer : public Renderer {
 
@@ -12,7 +12,7 @@ private:
     Gdiplus::REAL height;
 
 public:
-    CircleRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Circle& circle);
+    CircleRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, RawElement* rawElement);
     void render(Gdiplus::Graphics& graphics) const override;
 
 };

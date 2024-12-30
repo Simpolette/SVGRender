@@ -1,15 +1,21 @@
 #include "EllipseRenderer.h"
 
-EllipseRenderer::EllipseRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Ellip& ellipse)
+EllipseRenderer::EllipseRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, RawElement* rawElement)
 : Renderer(fill, stroke, transform) {
-    Gdiplus::PointF coord = ellipse.getPoint();
-    double rx = ellipse.getRX();
-    double ry = ellipse.getRY();
+    Ellip* ellipse = dynamic_cast<Ellip*>(rawElement);
+    Gdiplus::PointF coord = ellipse->getPoint();
+    double rx = ellipse->getRX();
+    double ry = ellipse->getRY();
 
     x = coord.X - rx;
     y = coord.Y - ry;
     width = rx * 2;
     height = ry * 2;
+
+    Gdiplus::RectF bound(x, y, width, height);
+    if (!brush){
+        brush = fill.getGradientBrush(bound);
+    }
 }
 
 void EllipseRenderer::render(Gdiplus::Graphics& graphics) const {

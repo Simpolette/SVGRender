@@ -1,9 +1,10 @@
 ﻿#include "GroupRenderer.h"
 #include "RendererFactory.h"
 
-GroupRenderer::GroupRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Group& group)
+GroupRenderer::GroupRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, RawElement* rawElement)
 : Renderer(fill, stroke, transform){
-	const std::vector<RawElement*>& vec = group.getRawElement();
+    Group* group = dynamic_cast<Group*>(rawElement);
+	const std::vector<RawElement*>& vec = group->getRawElement();
 	for (int i = 0; i < vec.size(); i++) {
 		Renderer* render = RendererFactory::createRenderer(vec[i]);
 		if (render) {

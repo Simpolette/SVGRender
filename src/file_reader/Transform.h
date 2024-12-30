@@ -5,6 +5,7 @@
 #include <Gdiplus.h>
 #include <iostream>
 #include <vector>
+#include <sstream>
 
 class Transform{
 private:
@@ -12,7 +13,7 @@ private:
 public:
     Transform();
     Transform(std::vector<std::pair<std::string, std::string>> transforms);
-    std::vector<std::pair<std::string, std::string>> getTransforms() const;
+    Gdiplus::Matrix* getMatrix() const;
     void print() const;
 };
 

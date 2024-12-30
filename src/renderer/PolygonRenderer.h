@@ -10,7 +10,7 @@ private:
     int count;
 
 public:
-    PolygonRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const PolyGon& polygon);
+    PolygonRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, RawElement* rawElement);
     void render(Gdiplus::Graphics& graphics) const override;
     ~PolygonRenderer();
 };

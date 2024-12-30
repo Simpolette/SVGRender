@@ -10,7 +10,7 @@ private:
     Gdiplus::PointF endPoint;
 
 public:
-    LineRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Line& line);
+    LineRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, RawElement* rawElement);
     void render(Gdiplus::Graphics& graphics) const override;
 };
 

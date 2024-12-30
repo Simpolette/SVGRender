@@ -1,12 +1,18 @@
 #include "RectangleRenderer.h"
 
-RectangleRenderer::RectangleRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Rectan& rect)
+RectangleRenderer::RectangleRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, RawElement* rawElement)
 : Renderer(fill, stroke, transform) {
-    Gdiplus::PointF coord = rect.getPoint();
+    Rectan* rect = dynamic_cast<Rectan*>(rawElement);
+    Gdiplus::PointF coord = rect->getPoint();
     x = coord.X;
     y = coord.Y;
-    width = rect.getWidth();
-    height = rect.getHeight();
+    width = rect->getWidth();
+    height = rect->getHeight();
+
+    Gdiplus::RectF bound(x, y, width, height);
+    if (!brush){
+        brush = fill.getGradientBrush(bound);
+    }
 }
 
 void RectangleRenderer::render(Gdiplus::Graphics& graphics) const {

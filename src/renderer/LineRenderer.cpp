@@ -1,9 +1,10 @@
 #include "LineRenderer.h"
 
-LineRenderer::LineRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Line& line)
+LineRenderer::LineRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, RawElement* rawElement)
 : Renderer(fill, stroke, transform) {
-    startPoint = line.getPointStart();
-    endPoint = line.getPointEnd();
+    Line* line = dynamic_cast<Line*>(rawElement);
+    startPoint = line->getPointStart();
+    endPoint = line->getPointEnd();
 }
 
 void LineRenderer::render(Gdiplus::Graphics& graphics) const {

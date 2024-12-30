@@ -1,11 +1,5 @@
 #include "RawElement.h"
 
-RawElement::RawElement(){
-    this->stroke = Stroke();
-    this->fill = Fill();
-    this->transform = Transform();
-}
-
 RawElement::RawElement(const Stroke& stroke, const Fill& fill, const Transform& transform){
     this->stroke = stroke;
     this->fill = fill;

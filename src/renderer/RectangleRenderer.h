@@ -12,7 +12,7 @@ private:
     Gdiplus::REAL height;
 
 public:
-    RectangleRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Rectan& rect);
+    RectangleRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, RawElement* rect);
     void render(Gdiplus::Graphics& graphics) const override;
 };
 

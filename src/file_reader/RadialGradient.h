@@ -12,12 +12,9 @@ private:
     Gdiplus::PointF fCenterPoint;
     double fRadius;
 public:
-    RadialGradient();
-    RadialGradient(std::string id, std::string units, std::string transform, std::string spreadMethod, std::vector<Stop> stops, Gdiplus::PointF centerPoint, double radius, Gdiplus::PointF fCenterPoint, double fRadius);
-    Gdiplus::PointF getCenterPoint();
-    double getRadius();
-    Gdiplus::PointF getFCenterPoint();
-    double getFRadius();
+    RadialGradient(std::string units, Transform transform, std::string spreadMethod, std::vector<Stop> stops, Gdiplus::PointF centerPoint, double radius, Gdiplus::PointF fCenterPoint, double fRadius);
+    Gdiplus::Brush* getBrush(const Gdiplus::RectF& bound) const override;
+    void print() const override;
 };
 
 #endif

@@ -9,14 +9,14 @@
 class Stop {
 private:
     double offset;
-    SVGColor color;
+    Gdiplus::Color color;
     double opacity;
 public:
-    Stop();
     Stop(double offset, std::string color, double opacity);
     double getOffset() const;
-    SVGColor getColor() const;
+    Gdiplus::Color getColor() const;
     double getOpacity() const;
+    void print() const;
 };
 
 #endif

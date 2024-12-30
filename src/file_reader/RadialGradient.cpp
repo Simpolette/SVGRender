@@ -1,32 +1,57 @@
 #include "RadialGradient.h"
 
-RadialGradient::RadialGradient() : Gradient() {
-    this->centerPoint = Gdiplus::PointF(0, 0);
-    this->radius = 0;
-    this->fCenterPoint = Gdiplus::PointF(0, 0);
-    this->fRadius = 0;
-}
-
-RadialGradient::RadialGradient(std::string id, std::string units, std::string transform, std::string spreadMethod, std::vector<Stop> stops, Gdiplus::PointF centerPoint, double radius, Gdiplus::PointF fCenterPoint, double fRadius)
-: Gradient(id, units, transform, spreadMethod, stops) {
+RadialGradient::RadialGradient(std::string units, Transform transform, std::string spreadMethod, std::vector<Stop> stops, Gdiplus::PointF centerPoint, double radius, Gdiplus::PointF fCenterPoint, double fRadius)
+: Gradient(units, transform, spreadMethod, stops) {
     this->centerPoint = centerPoint;
     this->radius = radius;
     this->fCenterPoint = fCenterPoint;
     this->fRadius = fRadius;
 }
 
-Gdiplus::PointF RadialGradient::getCenterPoint() {
-    return this->centerPoint;
-}
+Gdiplus::Brush* RadialGradient::getBrush(const Gdiplus::RectF& bound) const {
+    Gdiplus::RectF gradientBound(bound);
+    if (units == "userSpaceOnUse"){
+        gradientBound.X = centerPoint.X - radius;
+        gradientBound.Y = centerPoint.Y - radius;
+        gradientBound.Width = radius * 2;
+        gradientBound.Height = radius * 2;
+    }
 
-double RadialGradient::getRadius() {
-    return this->radius;
-}
+    Gdiplus::GraphicsPath gradientPath;
+    gradientPath.AddEllipse(gradientBound);
 
-Gdiplus::PointF RadialGradient::getFCenterPoint() {
-    return this->fCenterPoint;
-}
+    Gdiplus::PathGradientBrush* brush = new Gdiplus::PathGradientBrush(&gradientPath);
+    int stopCount = stops.size();
+    Gdiplus::Color* colors = new Gdiplus::Color[stopCount + 2];
+    Gdiplus::REAL* offsets = new Gdiplus::REAL[stopCount + 2];    
     
-double RadialGradient::getFRadius() {
-    return this->fRadius;
+    colors[0] = stops[0].getColor();
+    offsets[0] = 0;
+
+    colors[stopCount + 1] = stops[stopCount - 1].getColor();
+    offsets[stopCount + 1] = 1;
+
+    for (int i = 0; i < stopCount; ++i) {
+        colors[i + 1] = stops[i].getColor();
+        offsets[i + 1] = stops[i].getOffset();
+    }
+    stopCount += 2;
+    
+    brush->SetInterpolationColors(colors, offsets, stopCount);
+    brush->SetWrapMode(Gdiplus::WrapModeTileFlipXY);
+    brush->MultiplyTransform(transform.getMatrix());
+
+    delete[] colors;
+    delete[] offsets;
+
+    return brush;
+}
+
+void RadialGradient::print() const {
+    Gradient::print();
+    std::cout << "Type: RadialGradient\n";
+    std::cout << "Center: " << centerPoint.X << " " << centerPoint.Y << "\n";
+    std::cout << "Radius: " << radius << "\n";
+    std::cout << "CenterF: " << fCenterPoint.X << " " << fCenterPoint.Y << "\n";
+    std::cout << "RadiusF: " << fRadius << "\n";
 }

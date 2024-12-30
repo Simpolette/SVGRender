@@ -1,14 +1,20 @@
 #include "CircleRenderer.h"
 
-CircleRenderer::CircleRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Circle& circle)
+CircleRenderer::CircleRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, RawElement* rawElement)
 : Renderer(fill, stroke, transform) {
-    Gdiplus::PointF coord = circle.getPoint();
-    double r = circle.getRadius();
+    Circle* circle = dynamic_cast<Circle*>(rawElement);
+    Gdiplus::PointF coord = circle->getPoint();
+    double r = circle->getRadius();
 
     x = coord.X - r;
     y = coord.Y - r;
     width = r * 2;
     height = r * 2;
+
+    Gdiplus::RectF bound(x, y, width, height);
+    if (!brush){
+        brush = fill.getGradientBrush(bound);
+    }
 }
 
 void CircleRenderer::render(Gdiplus::Graphics& graphics) const {

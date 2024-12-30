@@ -1,9 +1,19 @@
 #include "TextRenderer.h"
 
-TextRenderer::TextRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Text& text) 
+TextRenderer::TextRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, RawElement* rawElement) 
 : Renderer(fill, stroke, transform) {
+    Text* text = dynamic_cast<Text*>(rawElement);
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    family = new Gdiplus::FontFamily(converter.from_bytes(text.getFontFamily()).c_str());
+
+    std::wstring content = converter.from_bytes(text->getContent());
+    int length = content.size();
+    Gdiplus::FontFamily* family;
+    int style = 0;
+    Gdiplus::REAL emSize = (float)text->getFontSize();
+    Gdiplus::PointF origin;
+    Gdiplus::StringFormat format;
+
+    family = new Gdiplus::FontFamily(converter.from_bytes(text->getFontFamily()).c_str());
     if (family->GetLastStatus() != Gdiplus::Ok){
         delete family;
         family = new Gdiplus::FontFamily(L"Times New Roman");
@@ -11,12 +21,7 @@ TextRenderer::TextRenderer(const Fill& fill, const Stroke& stroke, const Transfo
 
     double ascent = family->GetCellAscent(0);
     double emHeight = family->GetEmHeight(0);
-    Gdiplus::PointF point = text.getPoint();
-
-    content = converter.from_bytes(text.getContent());
-    length = content.size();
-    style = 0;
-    emSize = (float)text.getFontSize();
+    Gdiplus::PointF point = text->getPoint();
     double ascentOffset = emSize * (static_cast<Gdiplus::REAL>(ascent) / emHeight);
     double topLeftY = point.Y - ascentOffset;
 
@@ -27,10 +32,10 @@ TextRenderer::TextRenderer(const Fill& fill, const Stroke& stroke, const Transfo
     Gdiplus::RectF textBounds;
     Gdiplus::Font font(family, emSize, Gdiplus::FontStyleRegular, Gdiplus::UnitPixel);
     graphics.MeasureString(content.c_str(), -1, &font, origin, &textBounds);
-    if (text.getTextAnchor() == "middle"){
+    if (text->getTextAnchor() == "middle"){
         format.SetAlignment(Gdiplus::StringAlignmentCenter);
     }
-    else if (text.getTextAnchor() == "end"){
+    else if (text->getTextAnchor() == "end"){
         origin.X += 0.15 * emSize;
         format.SetAlignment(Gdiplus::StringAlignmentFar);
     }
@@ -39,6 +44,16 @@ TextRenderer::TextRenderer(const Fill& fill, const Stroke& stroke, const Transfo
         format.SetAlignment(Gdiplus::StringAlignmentNear);
     }
 
+    textGraphics.StartFigure();
+    textGraphics.AddString(content.c_str(), length, family, style, emSize, origin, &format);
+    delete family;
+
+    Gdiplus::RectF bound;
+    textGraphics.GetBounds(&bound);
+
+    if (!brush){
+        brush = fill.getGradientBrush(bound);
+    }
 }
 
 void TextRenderer::render(Gdiplus::Graphics& graphics) const{
@@ -46,16 +61,8 @@ void TextRenderer::render(Gdiplus::Graphics& graphics) const{
     graphics.GetTransform(&originalMatrix);
     graphics.MultiplyTransform(matrix);
 
-    Gdiplus::GraphicsPath text;
-    text.StartFigure();
-    text.AddString(content.c_str(), length, family, style, emSize, origin, &format);
-
-    graphics.FillPath(brush, &text);
-    graphics.DrawPath(pen, &text);
+    graphics.FillPath(brush, &textGraphics);
+    graphics.DrawPath(pen, &textGraphics);
 
     graphics.SetTransform(&originalMatrix);
-}
-
-TextRenderer::~TextRenderer(){
-    delete family;
 }

@@ -20,9 +20,9 @@ private:
 public:
     Fill();
     Fill(std::string color, double opacity, std::string rule, Gradient* gradient);
-    Gdiplus::Color getColorA() const;
-    double getOpacity() const;
     std::string getRule() const;
+    Gdiplus::Brush* getBrush() const;
+    Gdiplus::Brush* getGradientBrush(const Gdiplus::RectF& bound) const;
     void print() const;
 };
 

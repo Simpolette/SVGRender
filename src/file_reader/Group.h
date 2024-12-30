@@ -12,7 +12,7 @@ public:
     ElementType getType() const;
     std::vector<RawElement*> getRawElement() const;
     void print() const override;
-    Group(std::vector<RawElement*> re,const Stroke& stroke, const Fill& fill, const Transform& transform);
+    Group(std::vector<RawElement*> re, const Stroke& stroke, const Fill& fill, const Transform& transform);
 };
 
 #endif

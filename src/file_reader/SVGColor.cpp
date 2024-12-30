@@ -6,10 +6,6 @@ int SVGColor::getValue(const std::string& s) const {
     return std::stoi(s, NULL, 16);
 }
 
-SVGColor::SVGColor() {
-    r = g = b = 0;
-}
-
 SVGColor::SVGColor(const std::string& color){
     if (color == ""){
         r = g = b = 0;

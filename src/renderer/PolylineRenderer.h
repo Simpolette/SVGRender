@@ -10,7 +10,7 @@ private:
     int count;
 
 public:
-    PolylineRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const PolyLine& polyline);
+    PolylineRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, RawElement* rawElement);
     void render(Gdiplus::Graphics& graphics) const override;
     ~PolylineRenderer();
 };

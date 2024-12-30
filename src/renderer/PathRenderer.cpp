@@ -5,16 +5,15 @@
 const double PI = 3.14159265358979323846;  // Định nghĩa lại nếu chưa có
 #define DEGREE (180 / PI)
 
-float CalculateVectorAngle(float x, float y)
-{
+float PathRenderer::CalculateVectorAngle(float x, float y) const {
     float angle = atan2(y, x);
     
     return angle * DEGREE;
 }
 
-PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Path& path)
+PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, RawElement* rawElement)
 : Renderer(fill, stroke, transform) {
-
+    Path* path = dynamic_cast<Path*>(rawElement);
     std::string fillRule = fill.getRule();
     if (fillRule == "evenodd"){
         pathGraphics.SetFillMode(Gdiplus::FillModeAlternate);
@@ -23,7 +22,7 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
         pathGraphics.SetFillMode(Gdiplus::FillModeWinding);
     }
 
-    const std::vector<std::pair<char, Gdiplus::PointF>>& pathData = path.getPath();
+    const std::vector<std::pair<char, Gdiplus::PointF>>& pathData = path->getPath();
 
     Gdiplus::PointF currentPoint(0, 0);  // Điểm hiện tại (bắt đầu từ 0, 0) kiểu PointF
     pathGraphics.StartFigure();  // Bắt đầu một hình vẽ mới
@@ -250,8 +249,6 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
 
             float width = 2 * rx;
             float height = 2 * ry;
-
-
 
             arc.AddArc(LRect.X, LRect.Y, width, height, theta1, dtheta);
             arc_mat.RotateAt(phi, Gdiplus::PointF(cx,cy));
@@ -499,6 +496,11 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
         }
     }
 
+    Gdiplus::RectF bound;
+    pathGraphics.GetBounds(&bound);
+    if (!brush){
+        brush = fill.getGradientBrush(bound);
+    }
 }
 
 void PathRenderer::render(Gdiplus::Graphics& graphics) const {

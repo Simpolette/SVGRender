@@ -8,18 +8,11 @@
 class TextRenderer : public Renderer{
 
 private:
-    std::wstring content;
-    int length;
-    Gdiplus::FontFamily* family;
-    int style;
-    Gdiplus::REAL emSize;
-    Gdiplus::PointF origin;
-    Gdiplus::StringFormat format;
+    Gdiplus::GraphicsPath textGraphics;
 
 public:
-    TextRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Text& text);
+    TextRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, RawElement* rawElement);
     void render(Gdiplus::Graphics& graphics) const override;
-    ~TextRenderer();
 };
 
 #endif

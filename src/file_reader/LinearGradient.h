@@ -9,10 +9,9 @@ class LinearGradient : public Gradient{
 private:
     Gdiplus::PointF p1, p2;
 public:
-    LinearGradient();
-    LinearGradient(std::string id, std::string units, std::string transform, std::string spreadMethod, std::vector<Stop> stops, Gdiplus::PointF p1, Gdiplus::PointF p2);
-    Gdiplus::PointF getPoint1();
-    Gdiplus::PointF getPoint2();
+    LinearGradient(std::string units, Transform transform, std::string spreadMethod, std::vector<Stop> stops, Gdiplus::PointF p1, Gdiplus::PointF p2);
+    Gdiplus::Brush* getBrush(const Gdiplus::RectF& bound) const override;
+    void print() const override;
 };
 
 #endif

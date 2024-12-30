@@ -12,7 +12,7 @@ private:
     Gdiplus::REAL height;
 
 public:
-    EllipseRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, const Ellip& ellipse);
+    EllipseRenderer(const Fill& fill, const Stroke& stroke, const Transform& transform, RawElement* rawElement);
     void render(Gdiplus::Graphics& graphics) const override;
 };
 

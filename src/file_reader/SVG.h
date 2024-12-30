@@ -30,10 +30,10 @@ private:
     Gdiplus::PointF boxOrigin;
     double boxWidth;
     double boxHeight;
-    std::vector<Gradient*> gradients;
+    std::unordered_map<std::string, Gradient*> gradients;
 
 private:
-    bool checkAlpha(char ch);
+    bool checkCommand(char ch);
     bool checkNumber(char ch);
     void standardizeString(std::string& s);
     std::string standardizeText(std::string text);

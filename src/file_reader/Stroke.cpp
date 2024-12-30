@@ -26,20 +26,20 @@ Stroke::Stroke(std::string color, double width, double opacity, std::string line
     
 }
 
-Gdiplus::Color Stroke::getColorA() const {
-    return color;
-}
+Gdiplus::Pen* Stroke::getPen() const {
+    Gdiplus::Color penColor(
+        static_cast<BYTE>(opacity * 255), // Độ trong suốt (alpha)
+        color.GetRed(),
+        color.GetGreen(),
+        color.GetBlue()
+    );
 
-double Stroke::getOpacity() const {
-    return opacity;
-}
+    Gdiplus::Pen* pen = new Gdiplus::Pen(penColor, static_cast<Gdiplus::REAL>(width));
+    
+    pen->SetLineJoin(Gdiplus::LineJoinMiter);
+    pen->SetMiterLimit(miterlimit);
 
-double Stroke::getWidth() const{
-    return width;
-}
-
-double Stroke::getMiterLimit() const{
-    return miterlimit;
+    return pen;
 }
 
 void Stroke::print() const{
