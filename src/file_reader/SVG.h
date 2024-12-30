@@ -40,6 +40,7 @@ private:
     int countAttrVal(const std::string& attrValue);
     Stroke parseStroke(rapidxml::xml_attribute<> *attr);
     Fill parseFill(rapidxml::xml_attribute<> *attr);
+    void parseStyle(const std::string &style, Stroke& stroke, Fill& fill);
     Transform parseTransform(const std::string& transformVal);
     RawElement* parseRect(rapidxml::xml_node<> *node);
     RawElement* parseCircle(rapidxml::xml_node<> *node);
