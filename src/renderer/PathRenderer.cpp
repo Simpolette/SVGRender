@@ -24,6 +24,7 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
 
     const std::vector<std::pair<char, Gdiplus::PointF>>& pathData = path->getPath();
 
+    Gdiplus::PointF startPoint(0, 0);
     Gdiplus::PointF currentPoint(0, 0);  // Điểm hiện tại (bắt đầu từ 0, 0) kiểu PointF
     pathGraphics.StartFigure();  // Bắt đầu một hình vẽ mới
 
@@ -36,6 +37,7 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
         case 'M':  // MoveTo (di chuyển đến vị trí mới)
             pathGraphics.StartFigure();  // Bắt đầu một hình vẽ mới
             currentPoint = point;  // Chuyển sang kiểu PointF
+            startPoint = point;
             break;
         case 'L':  // LineTo (vẽ đường thẳng)
             pathGraphics.AddLine(currentPoint, point);  // Sử dụng PointF thay vì PointF
@@ -178,8 +180,7 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
                 
             }
             break;
-        case 'A': 
-            {
+        case 'A': {
             float cx,cy,cxp,cyp,theta1,dtheta;
             Gdiplus::GraphicsPath arc;
             Gdiplus::Matrix arc_mat;
@@ -260,9 +261,8 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
 
             i += 3;
              
-        }
             break;
-            
+            }
 
         case 'Z':  // ClosePath (đóng đường vẽ)
             pathGraphics.CloseFigure();  // Đóng đường vẽ mà không cần AddLine
@@ -273,14 +273,14 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
             pathGraphics.StartFigure();  // Bắt đầu một hình vẽ mới
             currentPoint.X += point.X;  // Di chuyển tương đối
             currentPoint.Y += point.Y;  // Di chuyển tương đối
+            startPoint = currentPoint;
             break;
-        case 'l':  // lineTo (vẽ đường thẳng theo tọa độ tương đối)
-        {
+        case 'l':{  // lineTo (vẽ đường thẳng theo tọa độ tương đối)
             Gdiplus::PointF newP = Gdiplus::PointF(currentPoint.X + point.X, currentPoint.Y + point.Y);
             pathGraphics.AddLine(currentPoint, newP);
             currentPoint = newP;
-        }
             break;
+        }
         case 'h':  // horizontal lineTo (vẽ đường ngang theo tọa độ tương đối)
             pathGraphics.AddLine(currentPoint, Gdiplus::PointF(currentPoint.X + point.X, currentPoint.Y));
             currentPoint.X += point.X;  // Chỉ thay đổi X, Y giữ nguyên
@@ -485,10 +485,11 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
 
                 i += 3;
             
-            }
             break;
+            }
         case 'z':  // closePath (đóng đường vẽ)
             pathGraphics.CloseFigure();
+            currentPoint = startPoint;
             break;
 
         default:

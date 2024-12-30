@@ -17,3 +17,19 @@ void Gradient::print() const {
         stops[i].print();
     }
 }
+
+std::string Gradient::getUnits() const {
+    return units;
+}
+
+Transform Gradient::getTransform() const {
+    return transform;
+}
+
+std::string Gradient::getSpreadMethod() const {
+    return spreadMethod;
+}
+
+std::vector<Stop> Gradient::getStops() const {
+    return stops;
+}

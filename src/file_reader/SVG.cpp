@@ -712,7 +712,6 @@ std::vector<std::pair<char, Gdiplus::PointF>> GetSVG::parsePathData(rapidxml::xm
     std::vector<std::pair<char, Gdiplus::PointF>> pathData;
     std::string d = attr->value();
     standardizeString(d);
-    std::cout << d << "\n";
     std::stringstream ss(d);
     std::string val;
     char curCommand = 'M'; // Init default value
@@ -882,9 +881,30 @@ void GetSVG::parseGradient(rapidxml::xml_node<> *defs) {
         std::string units = "objectBoundingBox";
         Transform transform;
         std::string spreadMethod = "pad";
+        std::vector<Stop> stops;
+        
         rapidxml::xml_attribute<>* idAttr = node->first_attribute("id");
-        if (idAttr) {
+        if (idAttr){
             id = idAttr->value();
+        }
+        rapidxml::xml_attribute<>* href = node->first_attribute("xlink:href");
+        if (href){
+            std::string attrVal = href->value();
+            std::string idCopy;
+            if (attrVal.find("'") != std::string::npos) {
+                idCopy = attrVal.substr(attrVal.find("'") + 1);
+                idCopy.erase(idCopy.find("'"));
+                idCopy.erase(idCopy.find("#"), 1);
+            } 
+            else{
+                idCopy = attrVal.substr(attrVal.find("#") + 1);
+            }
+            if (gradients.find(idCopy) != gradients.end()){
+                units = gradients[idCopy]->getUnits();
+                spreadMethod = gradients[idCopy]->getSpreadMethod();
+                stops = gradients[idCopy]->getStops();
+                transform = gradients[idCopy]->getTransform();
+            } 
         }
 
         for (rapidxml::xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute()){
@@ -901,8 +921,10 @@ void GetSVG::parseGradient(rapidxml::xml_node<> *defs) {
                 spreadMethod = attrValue;
             }
         }
+        if (node->first_node("stop")){
+            stops.clear();
+        }
 
-        std::vector<Stop> stops;
         for (rapidxml::xml_node<>* childNode = node->first_node("stop"); childNode; childNode = childNode->next_sibling("stop")) {
             std::string color = "";
             double offset = 0;
