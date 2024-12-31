@@ -19,41 +19,30 @@ VOID OnPaint(HDC hdc, std::string filePath)
    // Ref: https://docs.microsoft.com/en-us/windows/desktop/gdiplus/-gdiplus-getting-started-use
    Graphics graphics(hdc);
    graphics.SetSmoothingMode(SmoothingModeHighQuality);
+   
+   Gdiplus::Matrix matrix;
+   matrix.Scale(scale, scale); 
 
    RECT clientRect;
    GetClientRect(WindowFromDC(hdc), &clientRect);
-   double viewportWidth = clientRect.right - clientRect.left;
-   double viewportHeight = clientRect.bottom - clientRect.top;
-   double centerX = viewportWidth / 2;
-   double centerY = viewportHeight / 2;
+   float centerX = (clientRect.right - clientRect.left);
+   float centerY = (clientRect.bottom - clientRect.top);
 
    GetSVG getSVG;
    vec = getSVG.parseSVGFile(filePath);
    int n = vec.size();
 
-   double viewBoxX = getSVG.getBoxOrigin().X;
-   double viewBoxY = getSVG.getBoxOrigin().Y;
-   double viewBoxWidth = getSVG.getBoxWidth();
-   double viewBoxHeight = getSVG.getBoxHeight();
+   double viewWidth = getSVG.getViewWidth();
+   double viewHeight = getSVG.getViewHeight();
+   Gdiplus::PointF boxOrigin = getSVG.getBoxOrigin();
+   double boxWidth = getSVG.getBoxWidth();
+   double boxHeight = getSVG.getBoxHeight();
+      // Áp dụng các phép biến đổi
+   matrix.Translate(-centerX, -centerY);  // Dịch về gốc tọa độ
 
-   double scaleX = viewportWidth / viewBoxWidth;
-   double scaleY = viewportHeight / viewBoxHeight;
-   double uniformScale = std::min(scaleX, scaleY);
-   double offsetX = (viewportWidth - viewBoxWidth * uniformScale) / 2;
-   double offsetY = (viewportHeight - viewBoxHeight * uniformScale) / 2;
-
-   Gdiplus::Matrix matrix;
-   matrix.Scale(scale, scale); 
-
-   matrix.Translate(-viewBoxX, -viewBoxY);
-
-   matrix.Translate(offsetX / uniformScale, offsetY / uniformScale);
-
-   matrix.Translate(-centerX, -centerY);   
-   matrix.Rotate(rotationAngle);          
-   matrix.Translate(centerX, centerY);    
-   matrix.Scale(uniformScale, uniformScale);
-
+   matrix.Rotate(rotationAngle);         // Xoay quanh gốc
+   matrix.Translate(centerX, centerY);   // Dịch về vị trí ban đầu
+   matrix.Scale(scale, scale);           // Áp dụng zoom
    graphics.SetTransform(&matrix);
 
 
