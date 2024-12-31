@@ -1,4 +1,3 @@
-// #include "stdafx.h"
 #include <vector>
 #include <fstream>
 
@@ -15,46 +14,12 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 VOID OnPaint(HDC hdc){
    Gdiplus::Graphics graphics(hdc);
    graphics.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);
-   
-   Gdiplus::Matrix matrix;
-   matrix.Scale(scale, scale); 
-
-   RECT clientRect;
-   GetClientRect(WindowFromDC(hdc), &clientRect);
-   float centerX = (clientRect.right - clientRect.left);
-   float centerY = (clientRect.bottom - clientRect.top);
-
-   GetSVG getSVG;
-   vec = getSVG.parseSVGFile(filePath);
-   int n = vec.size();
-
-   double viewWidth = getSVG.getViewWidth();
-   double viewHeight = getSVG.getViewHeight();
-   Gdiplus::PointF boxOrigin = getSVG.getBoxOrigin();
-   double boxWidth = getSVG.getBoxWidth();
-   double boxHeight = getSVG.getBoxHeight();
-      // Áp dụng các phép biến đổi
-   matrix.Translate(-centerX, -centerY);  // Dịch về gốc tọa độ
-
-   matrix.Rotate(rotationAngle);         // Xoay quanh gốc
-   matrix.Translate(centerX, centerY);   // Dịch về vị trí ban đầu
-   matrix.Scale(scale, scale);           // Áp dụng zoom
-   graphics.SetTransform(&matrix);
-
-
-   for (int i = 0; i < n; i++){
-      // vec[i]->print();
-      Renderer* render = RendererFactory::createRenderer(vec[i]);
-      render->render(graphics);
-      
-      delete vec[i];
-      delete render; 
-   }
+   viewer.setViewPort(hdc);
+   Gdiplus::Matrix* viewBoxMatrix = viewer.getViewBoxMatrix();
+   graphics.SetTransform(viewBoxMatrix);
+   viewer.render(graphics);
 }
-
-LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-
-INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
+INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR argument, INT iCmdShow)
 {
    // AllocConsole();
    // freopen("CONOUT$", "w", stdout);
@@ -63,10 +28,10 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
    WNDCLASS                      wndClass;
    Gdiplus::GdiplusStartupInput  gdiplusStartupInput;
    ULONG_PTR                     gdiplusToken;
-   
+
    // Initialize GDI+.
    Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
-   
+
    wndClass.style          = CS_HREDRAW | CS_VREDRAW;
    wndClass.lpfnWndProc    = WndProc;
    wndClass.cbClsExtra     = 0;
@@ -77,9 +42,9 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
    wndClass.hbrBackground  = (HBRUSH)GetStockObject(WHITE_BRUSH);
    wndClass.lpszMenuName   = NULL;
    wndClass.lpszClassName  = TEXT("GettingStarted");
-   
+
    RegisterClass(&wndClass);
-   
+
    hWnd = CreateWindow(
       TEXT("GettingStarted"),   // window class name
       TEXT("SVG Demo"),  // window caption
@@ -92,10 +57,10 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
       NULL,                     // window menu handle
       hInstance,                // program instance handle
       NULL);                    // creation parameters
-      
+
    ShowWindow(hWnd, iCmdShow);
    UpdateWindow(hWnd);
-   
+
    GetSVG getSVG;
    if (argument && argument[0]){
       std::string filePath = argument;
@@ -109,7 +74,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
          // vec[i]->print();
          Renderer* render = RendererFactory::createRenderer(vec[i]);
          viewer.addRenderer(render);
-         
+
          delete vec[i];
       }
    }
@@ -119,7 +84,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
       TranslateMessage(&msg);
       DispatchMessage(&msg);
    }
-   
+
    // FreeConsole();
    Gdiplus::GdiplusShutdown(gdiplusToken);
    return msg.wParam;
