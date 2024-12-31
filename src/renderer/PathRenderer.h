@@ -3,6 +3,13 @@
 
 #include "Renderer.h"
 
+#ifndef DEGREE
+#ifndef PI
+#define PI 3.14159265358979323846 // Định nghĩa lại nếu chưa có
+#endif  
+#define DEGREE (180 / PI)
+#endif
+
 class PathRenderer : public Renderer {
 
 private:

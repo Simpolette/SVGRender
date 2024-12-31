@@ -4,20 +4,16 @@
 
 #include "renderer/RendererFactory.h"
 #include "file_reader/SVG.h"
+#include "viewer/Viewer.h"
 
-using namespace std;
-using namespace Gdiplus;
 #pragma comment (lib,"Gdiplus.lib")
 
-float scale = 1.0f;
-float rotationAngle = 0.0f;
+Viewer viewer;
 
-std::vector<RawElement*> vec;
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-VOID OnPaint(HDC hdc, std::string filePath)
-{
-   // Ref: https://docs.microsoft.com/en-us/windows/desktop/gdiplus/-gdiplus-getting-started-use
-   Graphics graphics(hdc);
+VOID OnPaint(HDC hdc){
+   Gdiplus::Graphics graphics(hdc);
    graphics.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);
    
    Gdiplus::Matrix matrix;
@@ -47,7 +43,7 @@ VOID OnPaint(HDC hdc, std::string filePath)
 
 
    for (int i = 0; i < n; i++){
-      vec[i]->print();
+      // vec[i]->print();
       Renderer* render = RendererFactory::createRenderer(vec[i]);
       render->render(graphics);
       
@@ -60,16 +56,16 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
 {
-   AllocConsole();
-   freopen("CONOUT$", "w", stdout);
-   HWND                hWnd;
-   MSG                 msg;
-   WNDCLASS            wndClass;
-   GdiplusStartupInput gdiplusStartupInput;
-   ULONG_PTR           gdiplusToken;
+   // AllocConsole();
+   // freopen("CONOUT$", "w", stdout);
+   HWND                          hWnd;
+   MSG                           msg;
+   WNDCLASS                      wndClass;
+   Gdiplus::GdiplusStartupInput  gdiplusStartupInput;
+   ULONG_PTR                     gdiplusToken;
    
    // Initialize GDI+.
-   GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+   Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
    
    wndClass.style          = CS_HREDRAW | CS_VREDRAW;
    wndClass.lpfnWndProc    = WndProc;
@@ -100,14 +96,32 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
    ShowWindow(hWnd, iCmdShow);
    UpdateWindow(hWnd);
    
+   GetSVG getSVG;
+   if (argument && argument[0]){
+      std::string filePath = argument;
+      std::vector<RawElement*> vec;
+      vec = getSVG.parseSVGFile(filePath);
+      viewer.setBoxOrigin(getSVG.getBoxOrigin());
+      viewer.setBoxWidth(getSVG.getBoxWidth());
+      viewer.setBoxHeight(getSVG.getBoxHeight());
+
+      for (int i = 0; i < vec.size(); i++){
+         // vec[i]->print();
+         Renderer* render = RendererFactory::createRenderer(vec[i]);
+         viewer.addRenderer(render);
+         
+         delete vec[i];
+      }
+   }
+
    while(GetMessage(&msg, NULL, 0, 0))
    {
       TranslateMessage(&msg);
       DispatchMessage(&msg);
    }
    
-   GdiplusShutdown(gdiplusToken);
-   FreeConsole();
+   // FreeConsole();
+   Gdiplus::GdiplusShutdown(gdiplusToken);
    return msg.wParam;
 }  // WinMain
 
@@ -117,54 +131,39 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
    HDC          hdc;
    PAINTSTRUCT  ps;
 
-   std::string filePath = "";
-   
-   if (__argc == 2){
-      filePath = __argv[1];
-   }
-   else{
-      std::cout << "File unknown!\n";
-   }
-
    switch(message)
    {
-   case WM_PAINT:
+   case WM_PAINT:{
       hdc = BeginPaint(hWnd, &ps);
-      OnPaint(hdc, filePath);
+      OnPaint(hdc);
+
       EndPaint(hWnd, &ps);
       return 0;
+   }
    case WM_MOUSEWHEEL: {
        int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
-       if (zDelta > 0) {
-           scale *= 1.1f; // Zoom in
-       }
-       else {
-           scale /= 1.1f; // Zoom out
-       }
+       viewer.zoom(zDelta);
        InvalidateRect(hWnd, NULL, TRUE);
        return 0;
    }
    case WM_KEYDOWN:
        switch (wParam) {
        case VK_LEFT: // Xoay ngược chiều kim đồng hồ
-           rotationAngle -= 90.0f;
-           if (rotationAngle < 0) rotationAngle += 360;
-           InvalidateRect(hWnd, NULL, TRUE);
-           break;
+            viewer.rotateLeft();
+            InvalidateRect(hWnd, NULL, TRUE);
+            break;
        case VK_RIGHT: // Xoay thuận chiều kim đồng hồ
-           rotationAngle += 90.0f;
-           if (rotationAngle >= 360) rotationAngle -= 360;
-           InvalidateRect(hWnd, NULL, TRUE);
-           break;
+            viewer.rotateRight();
+            InvalidateRect(hWnd, NULL, TRUE);
+            break;
        case VK_UP: // Zoom in
-           scale += 0.1f;
-           InvalidateRect(hWnd, NULL, TRUE);
-           break;
+            viewer.zoom(1);
+            InvalidateRect(hWnd, NULL, TRUE);
+            break;
        case VK_DOWN: // Zoom out
-           scale -= 0.1f;
-           if (scale < 0.1f) scale = 0.1f; // Đặt ngưỡng zoom nhỏ nhất
-           InvalidateRect(hWnd, NULL, TRUE);
-           break;
+            viewer.zoom(-1);
+            InvalidateRect(hWnd, NULL, TRUE);
+            break;
        }
        return 0;
    case WM_DESTROY:

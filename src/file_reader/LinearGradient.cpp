@@ -11,24 +11,17 @@ Gdiplus::Brush* LinearGradient::getBrush(const Gdiplus::RectF& bound) const {
     Gdiplus::Color* colors = new Gdiplus::Color[stopCount + 2];
     Gdiplus::REAL* offsets = new Gdiplus::REAL[stopCount + 2];    
 
-    Gdiplus::PointF start; 
-    Gdiplus::PointF end;
-    
-    if (units == "objectBoundingBox"){
-        Gdiplus::PointF startingPoint(bound.X + p1.X * bound.Width, bound.Y + p1.Y * bound.Height); 
-        
-        // start = Gdiplus::PointF(bound.X + p1.X * bound.Width, bound.Y + p1.Y * bound.Height);
-        // end = Gdiplus::PointF(bound.X + p2.X * bound.Width, bound.Y + p2.Y * bound.Height);
-        start = Gdiplus::PointF(bound.X, bound.Y);
-        end = Gdiplus::PointF(bound.X + bound.Width, bound.Y + bound.Height);
-    }
-    else{
-        start = p1;
-        end = p2;
-    }
+    Gdiplus::PointF start = p1; 
+    Gdiplus::PointF end = p2;
 
-    // double scaleX = (1 - (p2.X - p1.X));
-    // double scaleY = (1 - (p2.Y - p1.Y));
+    Gdiplus::Matrix* matrix = transform.getMatrix();
+    matrix->TransformPoints(&start); 
+    matrix->TransformPoints(&end); 
+
+    if (units == "objectBoundingBox"){        
+        start = Gdiplus::PointF(bound.X + p1.X * bound.Width, bound.Y + p1.Y * bound.Height);
+        end = Gdiplus::PointF(bound.X + p2.X * bound.Width, bound.Y + p2.Y * bound.Height);
+    }
 
     colors[0] = stops[0].getColor();
     offsets[0] = 0;
@@ -38,7 +31,7 @@ Gdiplus::Brush* LinearGradient::getBrush(const Gdiplus::RectF& bound) const {
 
     for (int i = 0; i < stopCount; ++i) {
         colors[i + 1] = stops[i].getColor();
-        offsets[i + 1] = stops[i].getOffset();
+        offsets[i + 1] = (stops[i].getOffset());
     }
     stopCount += 2;
     
@@ -48,12 +41,13 @@ Gdiplus::Brush* LinearGradient::getBrush(const Gdiplus::RectF& bound) const {
         stops[0].getColor(),
         stops[stopCount - 1].getColor()
     );
+
     brush->SetInterpolationColors(colors, offsets, stopCount);
-    brush->SetWrapMode(Gdiplus::WrapModeTileFlipXY);
-    brush->SetTransform(transform.getMatrix());
+    brush->SetWrapMode(Gdiplus::WrapModeClamp);
 
     delete[] colors;
     delete[] offsets;
+    delete matrix;
 
     return brush;
 }

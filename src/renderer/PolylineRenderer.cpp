@@ -37,6 +37,17 @@ void PolylineRenderer::render(Gdiplus::Graphics& graphics) const {
     Gdiplus::GraphicsPath polyline;
     polyline.StartFigure();
     polyline.AddLines(points, count);
+    Gdiplus::PathGradientBrush* radialBrush = dynamic_cast< Gdiplus::PathGradientBrush* >(brush);
+    if (radialBrush){
+        int colorCount = radialBrush->GetInterpolationColorCount();
+        Gdiplus::Color* colors = new Gdiplus::Color[colorCount];
+        Gdiplus::REAL* offset = new Gdiplus::REAL[colorCount];
+        radialBrush->GetInterpolationColors(colors, offset, colorCount);
+        Gdiplus::Color excludeColor = colors[colorCount - 1];
+        Gdiplus::SolidBrush fillExclude(excludeColor);
+        graphics.FillPath(&fillExclude, &polyline);
+        delete colors;
+    }
 
     graphics.FillPath(brush, &polyline);
     graphics.DrawPath(pen, &polyline);

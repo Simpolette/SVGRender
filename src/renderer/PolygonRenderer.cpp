@@ -39,6 +39,17 @@ void PolygonRenderer::render(Gdiplus::Graphics& graphics) const {
     polygon.AddPolygon(points, count);
     polygon.SetFillMode(Gdiplus::FillModeWinding);
 
+    Gdiplus::PathGradientBrush* radialBrush = dynamic_cast< Gdiplus::PathGradientBrush* >(brush);
+    if (radialBrush){
+        int colorCount = radialBrush->GetInterpolationColorCount();
+        Gdiplus::Color* colors = new Gdiplus::Color[colorCount];
+        Gdiplus::REAL* offset = new Gdiplus::REAL[colorCount];
+        radialBrush->GetInterpolationColors(colors, offset, colorCount);
+        Gdiplus::Color excludeColor = colors[colorCount - 1];
+        Gdiplus::SolidBrush fillExclude(excludeColor);
+        graphics.FillPath(&fillExclude, &polygon);
+        delete colors;
+    }
     graphics.FillPath(brush, &polygon);
     graphics.DrawPath(pen, &polygon);
 

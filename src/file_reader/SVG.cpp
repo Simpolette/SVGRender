@@ -460,10 +460,16 @@ RawElement* GetSVG::parseText(rapidxml::xml_node<> *node){
             transform = parseTransform(attrValue);
         }
         else if (attrName == "x"){
-            x = stod(attrValue);
+            x = getDoubleValue(attrValue);
+            if (attrValue.find('%') != std::string::npos){
+                x = boxOrigin.X + x * boxWidth;
+            }
         }
         else if (attrName == "y"){
-            y = stod(attrValue);
+            y = getDoubleValue(attrValue);
+            if (attrValue.find('%') != std::string::npos){
+                y = boxOrigin.Y + y * boxHeight;
+            }
         }
         else if (attrName == "font-size"){
             font_size = stod(attrValue);
