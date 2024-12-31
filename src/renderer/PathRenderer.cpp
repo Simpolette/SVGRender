@@ -1,10 +1,6 @@
 ﻿#include "PathRenderer.h"
 #include <cmath>
 
-
-const double PI = 3.14159265358979323846;  // Định nghĩa lại nếu chưa có
-#define DEGREE (180 / PI)
-
 float PathRenderer::CalculateVectorAngle(float x, float y) const {
     float angle = atan2(y, x);
     
@@ -509,7 +505,17 @@ void PathRenderer::render(Gdiplus::Graphics& graphics) const {
     Gdiplus::Matrix originalMatrix;
     graphics.GetTransform(&originalMatrix);
     graphics.MultiplyTransform(matrix);
-
+    Gdiplus::PathGradientBrush* radialBrush = dynamic_cast< Gdiplus::PathGradientBrush* >(brush);
+    if (radialBrush){
+        int colorCount = radialBrush->GetInterpolationColorCount();
+        Gdiplus::Color* colors = new Gdiplus::Color[colorCount];
+        Gdiplus::REAL* offset = new Gdiplus::REAL[colorCount];
+        radialBrush->GetInterpolationColors(colors, offset, colorCount);
+        Gdiplus::Color excludeColor = colors[colorCount - 1];
+        Gdiplus::SolidBrush fillExclude(excludeColor);
+        graphics.FillPath(&fillExclude, &pathGraphics);
+        delete colors;
+    }
     // Vẽ hình theo đường path đã tạo ra
     graphics.FillPath(brush, &pathGraphics);  // Tô màu path
     graphics.DrawPath(pen, &pathGraphics);    // Vẽ đường viền path

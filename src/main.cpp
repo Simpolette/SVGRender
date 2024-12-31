@@ -12,6 +12,15 @@ Viewer viewer;
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
+VOID OnPaint(HDC hdc){
+   Gdiplus::Graphics graphics(hdc);
+   graphics.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);
+   viewer.setViewPort(hdc);
+   Gdiplus::Matrix* viewBoxMatrix = viewer.getViewBoxMatrix();
+   graphics.SetTransform(viewBoxMatrix);
+   viewer.render(graphics);
+}
+
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR argument, INT iCmdShow)
 {
    // AllocConsole();
@@ -78,8 +87,8 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR argument, INT iCmdShow)
       DispatchMessage(&msg);
    }
    
-   Gdiplus::GdiplusShutdown(gdiplusToken);
    // FreeConsole();
+   Gdiplus::GdiplusShutdown(gdiplusToken);
    return msg.wParam;
 }  // WinMain
 
@@ -93,12 +102,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
    {
    case WM_PAINT:{
       hdc = BeginPaint(hWnd, &ps);
-      Gdiplus::Graphics graphics(hdc);
-      graphics.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);
-      viewer.setViewPort(hdc);
-      Gdiplus::Matrix* viewBoxMatrix = viewer.getViewBoxMatrix();
-      graphics.SetTransform(viewBoxMatrix);
-      viewer.render(graphics);
+      OnPaint(hdc);
 
       EndPaint(hWnd, &ps);
       return 0;
