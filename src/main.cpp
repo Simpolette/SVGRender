@@ -15,13 +15,46 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 VOID OnPaint(HDC hdc){
    Gdiplus::Graphics graphics(hdc);
    graphics.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);
-   viewer.setViewPort(hdc);
-   Gdiplus::Matrix* viewBoxMatrix = viewer.getViewBoxMatrix();
-   graphics.SetTransform(viewBoxMatrix);
-   viewer.render(graphics);
+   
+   Gdiplus::Matrix matrix;
+   matrix.Scale(scale, scale); 
+
+   RECT clientRect;
+   GetClientRect(WindowFromDC(hdc), &clientRect);
+   float centerX = (clientRect.right - clientRect.left);
+   float centerY = (clientRect.bottom - clientRect.top);
+
+   GetSVG getSVG;
+   vec = getSVG.parseSVGFile(filePath);
+   int n = vec.size();
+
+   double viewWidth = getSVG.getViewWidth();
+   double viewHeight = getSVG.getViewHeight();
+   Gdiplus::PointF boxOrigin = getSVG.getBoxOrigin();
+   double boxWidth = getSVG.getBoxWidth();
+   double boxHeight = getSVG.getBoxHeight();
+      // Áp dụng các phép biến đổi
+   matrix.Translate(-centerX, -centerY);  // Dịch về gốc tọa độ
+
+   matrix.Rotate(rotationAngle);         // Xoay quanh gốc
+   matrix.Translate(centerX, centerY);   // Dịch về vị trí ban đầu
+   matrix.Scale(scale, scale);           // Áp dụng zoom
+   graphics.SetTransform(&matrix);
+
+
+   for (int i = 0; i < n; i++){
+      // vec[i]->print();
+      Renderer* render = RendererFactory::createRenderer(vec[i]);
+      render->render(graphics);
+      
+      delete vec[i];
+      delete render; 
+   }
 }
 
-INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR argument, INT iCmdShow)
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+
+INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
 {
    // AllocConsole();
    // freopen("CONOUT$", "w", stdout);
