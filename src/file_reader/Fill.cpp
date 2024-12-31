@@ -112,6 +112,9 @@ void Fill::convertFromStyle(const std::string &style, std::string& id){
         else if (key == "fill-opacity"){
             opacity = stod(value);
         }
+        else if (key == "opacity"){
+            opacity = stod(value);
+        }
         else if (key == "fill-rule"){
             rule = value;
         }
