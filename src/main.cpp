@@ -47,7 +47,7 @@ VOID OnPaint(HDC hdc, std::string filePath)
 
 
    for (int i = 0; i < n; i++){
-      // vec[i]->print();
+      vec[i]->print();
       Renderer* render = RendererFactory::createRenderer(vec[i]);
       render->render(graphics);
       

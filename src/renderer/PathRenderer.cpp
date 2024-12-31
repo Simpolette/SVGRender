@@ -266,7 +266,8 @@ PathRenderer::PathRenderer(const Fill& fill, const Stroke& stroke, const Transfo
         }
 
         case 'Z':  // ClosePath (đóng đường vẽ)
-            pathGraphics.CloseFigure();  // Đóng đường vẽ mà không cần AddLine
+            pathGraphics.CloseFigure();
+            currentPoint = startPoint;
             break;
 
             // Các lệnh chữ thường:
