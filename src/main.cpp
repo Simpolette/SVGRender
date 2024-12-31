@@ -18,7 +18,7 @@ VOID OnPaint(HDC hdc, std::string filePath)
 {
    // Ref: https://docs.microsoft.com/en-us/windows/desktop/gdiplus/-gdiplus-getting-started-use
    Graphics graphics(hdc);
-   graphics.SetSmoothingMode(SmoothingModeHighQuality);
+   graphics.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);
    
    Gdiplus::Matrix matrix;
    matrix.Scale(scale, scale); 
@@ -47,7 +47,7 @@ VOID OnPaint(HDC hdc, std::string filePath)
 
 
    for (int i = 0; i < n; i++){
-      vec[i]->print();
+      // vec[i]->print();
       Renderer* render = RendererFactory::createRenderer(vec[i]);
       render->render(graphics);
       

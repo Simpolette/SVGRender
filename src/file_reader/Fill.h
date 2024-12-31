@@ -23,7 +23,9 @@ public:
     std::string getRule() const;
     Gdiplus::Brush* getBrush() const;
     Gdiplus::Brush* getGradientBrush(const Gdiplus::RectF& bound) const;
+    void convertFromStyle(const std::string &style, std::string& id);
     void print() const;
+    void setGradient(Gradient* gradient);
 };
 
 #endif

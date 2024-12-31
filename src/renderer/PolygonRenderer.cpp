@@ -9,17 +9,17 @@ PolygonRenderer::PolygonRenderer(const Fill& fill, const Stroke& stroke, const T
     
     Gdiplus::REAL minX, minY, maxX, maxY;
     if (count > 0){
-        minX = maxX = points[0].X;
-        minY = maxY = points[0].Y;
+        minX = maxX = pointsVec[0].X;
+        minY = maxY = pointsVec[0].Y;
     }
 
     for (int i = 0; i < count; i++){
+        points[i] = pointsVec[i];
+
         minX = std::min(minX, points[i].X);
         minY = std::min(minY, points[i].Y);
         maxX = std::max(maxX, points[i].X);
         maxY = std::max(maxY, points[i].Y);
-
-        points[i] = pointsVec[i];
     }
 
     Gdiplus::RectF bound(minX, minY, maxX - minX, maxY - minY);

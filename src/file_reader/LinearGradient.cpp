@@ -50,7 +50,7 @@ Gdiplus::Brush* LinearGradient::getBrush(const Gdiplus::RectF& bound) const {
     );
     brush->SetInterpolationColors(colors, offsets, stopCount);
     brush->SetWrapMode(Gdiplus::WrapModeTileFlipXY);
-    brush->MultiplyTransform(transform.getMatrix());
+    brush->SetTransform(transform.getMatrix());
 
     delete[] colors;
     delete[] offsets;

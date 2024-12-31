@@ -44,6 +44,23 @@ TextRenderer::TextRenderer(const Fill& fill, const Stroke& stroke, const Transfo
         format.SetAlignment(Gdiplus::StringAlignmentNear);
     }
 
+    double fontStyle;
+    if (text->getFontStyle() == "italic"){
+        fontStyle = 2;
+    }
+    else{
+        fontStyle = 0;
+    }
+
+    double fontWeight;
+    if (text->getFontWeight() == "bold"){
+        fontWeight = 1;
+    }
+    else{
+        fontWeight = 0;
+    }
+    style = fontStyle + fontWeight;
+
     textGraphics.StartFigure();
     textGraphics.AddString(content.c_str(), length, family, style, emSize, origin, &format);
     delete family;

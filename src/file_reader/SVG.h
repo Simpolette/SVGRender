@@ -31,6 +31,7 @@ private:
     double boxWidth;
     double boxHeight;
     std::unordered_map<std::string, Gradient*> gradients;
+    std::unordered_map<std::string, Fill> styleSheet;
 
 private:
     bool checkCommand(char ch);
@@ -52,7 +53,9 @@ private:
     RawElement* parseGroup(rapidxml::xml_node<> * node, rapidxml::xml_document<>& doc);
     RawElement* parsePath(rapidxml::xml_node<> *node);
     double getDoubleValue(const std::string &s);
-    void parseGradient(rapidxml::xml_node<> *node); 
+    void parseGradient(rapidxml::xml_node<> *node);
+    void parseDefs(rapidxml::xml_node<> *defs);
+    void parseStyleSheet(rapidxml::xml_node<> *node);
     std::vector<std::pair<char, Gdiplus::PointF>> parsePathData(rapidxml::xml_attribute<> *attr);
 
 public:

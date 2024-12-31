@@ -16,7 +16,6 @@ protected:
 public:
     Gradient(std::string units, Transform transform, std::string spreadMethod, std::vector<Stop> stops);
     virtual Gdiplus::Brush* getBrush(const Gdiplus::RectF& bound) const = 0;
-    std::string getID() const;
     virtual void print() const;
     std::string getUnits() const;
     Transform getTransform() const;

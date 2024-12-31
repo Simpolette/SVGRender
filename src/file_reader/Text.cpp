@@ -1,7 +1,8 @@
 #include "Text.h"
 
 Text::Text(std::string content, Gdiplus::PointF coord, double font_size, 
-        std::string font_family, std::string font_style, std::string text_anchor,
+        std::string font_family, std::string font_style, std::string font_weight,
+        std::string text_anchor,
         const Stroke& stroke, const Fill& fill, const Transform& transform)
 : RawElement(stroke, fill, transform) {
     this->content = content;
@@ -9,6 +10,7 @@ Text::Text(std::string content, Gdiplus::PointF coord, double font_size,
     this->font_size = font_size;
     this->font_family = font_family;
     this->font_style = font_style;
+    this->font_weight = font_weight;
     this->text_anchor = text_anchor;
 }
 
@@ -30,6 +32,10 @@ std::string Text::getFontFamily() const {
 
 std::string Text::getFontStyle() const {
     return font_style;
+}
+
+std::string Text::getFontWeight() const {
+    return font_weight;
 }
 
 std::string Text::getTextAnchor() const {

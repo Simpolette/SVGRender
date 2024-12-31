@@ -22,6 +22,7 @@ public:
     Stroke(std::string color, double width, double opacity, std::string linecap, std::vector<double> dasharray, std::string linejoin, double stroke_miterlimit);
     Gdiplus::Pen* getPen() const;
     void print() const;
+    void convertFromStyle(const std::string &style);
 };
 
 #endif

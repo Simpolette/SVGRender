@@ -51,3 +51,71 @@ void Stroke::print() const{
     std::cout << "Width: " << width << "\n";
     std::cout << "Mitter limit: " << miterlimit << "\n";
 }
+
+void Stroke::convertFromStyle(const std::string &style){
+    size_t pos = 0;
+    std::string color;
+
+    while (pos < style.length()) {
+        size_t key_end = style.find(':', pos);
+        size_t value_end = style.find(';', key_end);
+
+        if (key_end == std::string::npos) {
+            break;
+        }
+        if (value_end == std::string::npos) {
+            value_end = style.length();
+        }
+
+        std::string key = style.substr(pos, key_end - pos);
+        std::string value = style.substr(key_end + 1, value_end - key_end - 1);
+
+        key.erase(0, key.find_first_not_of(" \t"));
+        key.erase(key.find_last_not_of(" \t") + 1);
+        value.erase(0, value.find_first_not_of(" \t"));
+        value.erase(value.find_last_not_of(" \t") + 1);
+        if (key == "stroke") {
+            color = value;
+            for (int i = 0; i < color.size(); i++){
+                color[i] = std::tolower(color[i]);
+            }
+            if (color.find("none") != std::string::npos){
+                opacity = 0;
+                color = "";
+                break;
+            }
+        }
+        else if (key == "stroke-width"){
+            width = stod(value);
+            if (width == 0){
+                opacity = 0;
+                color = "";
+                break;
+            }
+        }
+        else if (key == "stroke-opacity"){
+            opacity = stod(value);
+        }
+        else if (key == "stroke-miterlimit"){
+            miterlimit = stod(value);
+        }
+        else if (key == "stroke-linecap"){
+            linecap = value;
+        }
+        else if (key == "stroke-dasharray"){
+            //Stroke_dasharray
+        }
+        else if (key == "stroke-linejoin"){
+            linejoin = value;
+        }
+
+        if (value_end == std::string::npos) {
+            pos = std::string::npos;
+        }
+        else {
+            pos = value_end + 1;
+        }
+    }
+    SVGColor fillColor(color);
+    this->color = Gdiplus::Color(fillColor.getR(), fillColor.getG(), fillColor.getB());
+}

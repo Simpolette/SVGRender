@@ -17,6 +17,8 @@ public:
     Gdiplus::Color getColor() const;
     double getOpacity() const;
     void print() const;
+    void convertFromStyle(const std::string &style);
+    double getDoubleValue(const std::string &s);
 };
 
 #endif
